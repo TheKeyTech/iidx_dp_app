@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IIDX DP KAIDEN</title>
+    <style>
+        :root {
+            /* ランプのテーマカラー設定 */
+            --color-np: #666666;
+            --color-f: #ff3333;
+            --color-ae: #cc33ff;
+            --color-e: #33ff33;
+            --color-n: #33ccff;
+            --color-hard: #ff5500;
+            --color-exh: #ffcc00;
+            --color-fc: #00ffcc;
+            --bg-color: #0d0f12;
+            --panel-bg: rgba(30, 35, 45, 0.7);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-image: radial-gradient(circle at 50% 0%, #1a2332 0%, #0d0f12 60%);
+            background-attachment: fixed;
+        }
+
+        /* ヘッダー周り */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+        .btn-export {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* プログレスバーエリア */
+        .progress-container {
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
+        }
+        .progress-bar-wrap {
+            margin-bottom: 10px;
+        }
+        .progress-text {
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+        .progress-bar-bg {
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff5500, #ffcc00);
+            box-shadow: 0 0 10px #ffcc00;
+            width: 0%;
+            transition: width 0.5s ease-out;
+        }
+
+        /* 検索とフィルタ */
+        .search-box, .filter-select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .preset-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .filter-btn {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #33ccff;
+            color: #33ccff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 楽曲リスト */
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 100px;
+        }
+        .song-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .song-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 15px;
+        }
+        .song-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #aaa;
+        }
+        .lamp-indicator {
+            width: 8px;
+            height: 40px;
+            border-radius: 4px;
+            background: var(--color-np);
+        }
+        .list-summary {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        /* ボトムシート（ランプ入力用ポップアップ） */
+        .bottom-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            background: rgba(20, 25, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+        .bottom-sheet.active {
+            bottom: 0;
+        }
+        .sheet-title {
+            text-align: center;
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        .song-title-display {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+        .lamp-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        .lamp-btn {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid #555;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .lamp-np { border-color: var(--color-np); color: var(--color-np); }
+        .lamp-f { border-color: var(--color-f); color: var(--color-f); box-shadow: 0 0 10px rgba(255,51,51,0.5); }
+        .lamp-ae { border-color: var(--color-ae); color: var(--color-ae); box-shadow: 0 0 10px rgba(204,51,255,0.5); }
+        .lamp-e { border-color: var(--color-e); color: var(--color-e); box-shadow: 0 0 10px rgba(51,255,51,0.5); }
+        .lamp-n { border-color: var(--color-n); color: var(--color-n); box-shadow: 0 0 10px rgba(51,204,255,0.5); }
+        .lamp-hard { border-color: var(--color-hard); color: var(--color-hard); box-shadow: 0 0 10px rgba(255,85,0,0.5); }
+        .lamp-exh { border-color: var(--color-exh); color: var(--color-exh); box-shadow: 0 0 15px rgba(255,204,0,0.6); }
+        .lamp-fc { border-color: var(--color-fc); color: var(--color-fc); box-shadow: 0 0 15px rgba(0,255,204,0.6); }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 99;
+        }
+        .overlay.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>IIDX DP KAIDEN</h1>
+        <button class="btn-export" onclick="exportCSV()">エクスポート</button>
+    </div>
+
+    <!-- プログレスバー -->
+    <div class="progress-container">
+        <div class="progress-bar-wrap">
+            <div class="progress-text" id="prog-text-10">LEVEL 10.x HARD: 計算中...</div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-10"></div></div>
+        </div>
+        <div class="progress-bar-wrap" style="margin-bottom:0;">
+            <div class="progress-text" id="prog-text-11">LEVEL 11.x CLEAR: 計算中...</div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-11" style="background: linear-gradient(90deg, #33ccff, #00ffcc); box-shadow: 0 0 10px #00ffcc;"></div></div>
+        </div>
+    </div>
+
+    <!-- 検索とマイフィルタ（プリセット） -->
+    <input type="text" class="search-box" placeholder="曲名で検索..." id="searchInput">
+
+    <div class="preset-filters">
+        <button class="filter-btn" onclick="applyPreset('10.5', 'NOT_HARD')">10.5 未難</button>
+        <button class="filter-btn" style="border-color:#ffcc00; color:#ffcc00;" onclick="applyPreset('11.0', 'NOT_CLEAR')">11.0 未クリア</button>
+        <button class="filter-btn" style="border-color:#cc33ff; color:#cc33ff;" onclick="applyPreset('12.0_OVER', 'NOT_HARD')">☆12 挑戦(未難)</button>
+    </div>
+
+    <!-- 絞り込みドロップダウン -->
+    <div class="filter-group">
+        <select id="filterLevel" class="filter-select">
+            <option value="ALL">非公式 全て</option>
+            <!-- JSで動的に追加 -->
+        </select>
+        <select id="filterLamp" class="filter-select">
+            <option value="ALL">ランプ 全て</option>
+            <option value="NOT_CLEAR">未クリア (NP/F)</option>
+            <option value="NOT_HARD">未難 (NP/F/AE/E/N)</option>
+            <option value="NOT_EXH">未EXH (HARD以下)</option>
+            <option value="CLEAR">クリア済 (AE以上)</option>
+            <option value="HARD">HARD以上</option>
+            <option value="EXH">EXH以上</option>
+        </select>
+    </div>
+
+    <div class="list-summary" id="listSummary">読み込み中...</div>
+    <div class="song-list" id="songList"></div>
+
+    <!-- ランプ入力ポップアップ -->
+    <div class="overlay" id="overlay"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-title">ランプ更新</div>
+        <div class="song-title-display" id="popupSongTitle"></div>
+        <div class="lamp-buttons">
+            <button class="lamp-btn lamp-np" onclick="updateLamp('NP')">NP</button>
+            <button class="lamp-btn lamp-f" onclick="updateLamp('F')">F</button>
+            <button class="lamp-btn lamp-ae" onclick="updateLamp('AE')">AE</button>
+            <button class="lamp-btn lamp-e" onclick="updateLamp('E')">E</button>
+            <button class="lamp-btn lamp-n" onclick="updateLamp('N')">N</button>
+            <button class="lamp-btn lamp-hard" onclick="updateLamp('HARD')">HARD</button>
+            <button class="lamp-btn lamp-exh" onclick="updateLamp('EXH')">EXH</button>
+            <button class="lamp-btn lamp-fc" onclick="updateLamp('FC')">FC</button>
+        </div>
+    </div>
+
+    <script>
+        let songs = [];
+        let userLamps = JSON.parse(localStorage.getItem('iidx_dp_lamps')) || {};
+        let currentEditingId = null;
+
+        // 初期化
+        async function init() {
+            try {
+                const res = await fetch('master_data.json');
+                songs = await res.json();
+                
+                // 存在する非公式レベルを抽出してドロップダウンに追加
+                populateLevelFilter();
+                
+                // 初期表示（全件出すと重いのでフィルタ適用状態を描画）
+                applyFilters();
+                updateProgress();
+            } catch (error) {
+                document.getElementById('songList').innerHTML = `<p style="color:red; text-align:center;">master_data.jsonの読み込みに失敗しました。</p>`;
+            }
+        }
+
+        // 存在する非公式レベル(10.2, 10.5等)を抽出してセレクトボックスを構築
+        function populateLevelFilter() {
+            const levelSelect = document.getElementById('filterLevel');
+            // 重複を排除して数値をソート
+            const levels = [...new Set(songs.map(s => s.level))].sort((a, b) => a - b);
+            
+            levelSelect.innerHTML = '<option value="ALL">非公式 全て</option>';
+            levelSelect.innerHTML += '<option value="12.0_OVER">☆12 (12.0以上)</option>'; // プリセット用の特別枠
+            
+            levels.forEach(lv => {
+                const option = document.createElement('option');
+                // 10.0 のように小数点第1位まで表示
+                const displayLv = Number.isInteger(lv) ? lv.toFixed(1) : lv;
+                option.value = lv;
+                option.textContent = `非公式 ${displayLv}`;
+                levelSelect.appendChild(option);
+            });
+        }
+
+        // ランプのランク（判定用）
+        const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
+
+        // フィルタ条件を適用して描画
+        function applyFilters() {
+            const searchWord = document.getElementById('searchInput').value.toLowerCase();
+            const filterLv = document.getElementById('filterLevel').value;
+            const filterLamp = document.getElementById('filterLamp').value;
+
+            const filteredSongs = songs.filter(s => {
+                const lamp = userLamps[s.id] || 'NP';
+                const rank = lampRank[lamp];
+
+                // 1. 検索文字列フィルタ
+                if (searchWord && !s.title.toLowerCase().includes(searchWord)) return false;
+
+                // 2. 非公式レベルフィルタ
+                if (filterLv !== 'ALL') {
+                    if (filterLv === '12.0_OVER') {
+                        if (s.level < 12.0) return false;
+                    } else if (s.level !== parseFloat(filterLv)) {
+                        return false;
+                    }
+                }
+
+                // 3. ランプ状態フィルタ
+                if (filterLamp !== 'ALL') {
+                    if (filterLamp === 'NOT_CLEAR' && rank >= 2) return false; // AE以上を除外
+                    if (filterLamp === 'NOT_HARD' && rank >= 5) return false;  // HARD以上を除外
+                    if (filterLamp === 'NOT_EXH' && rank >= 6) return false;   // EXH以上を除外
+                    if (filterLamp === 'CLEAR' && rank < 2) return false;      // NP/Fを除外
+                    if (filterLamp === 'HARD' && rank < 5) return false;
+                    if (filterLamp === 'EXH' && rank < 6) return false;
+                }
+
+                return true;
+            });
+
+            renderList(filteredSongs);
+        }
+
+        // マイフィルタ（プリセットボタン）の実行
+        function applyPreset(levelVal, lampVal) {
+            document.getElementById('filterLevel').value = levelVal;
+            document.getElementById('filterLamp').value = lampVal;
+            applyFilters();
+        }
+
+        // イベントリスナーの登録
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('filterLevel').addEventListener('change', applyFilters);
+        document.getElementById('filterLamp').addEventListener('change', applyFilters);
+
+        // リストの描画
+        function renderList(targetSongs) {
+            const listEl = document.getElementById('songList');
+            const summaryEl = document.getElementById('listSummary');
+            listEl.innerHTML = '';
+            
+            // 件数表示
+            summaryEl.textContent = `${targetSongs.length} 曲表示中 (全 ${songs.length} 曲)`;
+
+            targetSongs.forEach(song => {
+                const lamp = userLamps[song.id] || 'NP';
+                const div = document.createElement('div');
+                div.className = 'song-card';
+                let lampColor = `var(--color-${lamp.toLowerCase()})`;
+                if(lamp === 'NP') lampColor = '#333';
+
+                // ★ 公式難度をメインに、非公式難度を並記する表示に変更
+                const displayLv = Number.isInteger(song.level) ? song.level.toFixed(1) : song.level;
+                
+                div.innerHTML = `
+                    <div class="song-info">
+                        <h3 style="color: ${lamp !== 'NP' ? lampColor : '#fff'}">${song.title}</h3>
+                        <p>☆${song.official_level} / 非公式 ${displayLv} (${lamp})</p>
+                    </div>
+                    <div class="lamp-indicator" style="background: ${lampColor}; box-shadow: 0 0 10px ${lampColor};"></div>
+                `;
+                
+                // タップでポップアップを開き、タイトルを渡す
+                div.onclick = () => openSheet(song.id, song.title);
+                listEl.appendChild(div);
+            });
+        }
+
+        const sheet = document.getElementById('bottomSheet');
+        const overlay = document.getElementById('overlay');
+        const titleDisplay = document.getElementById('popupSongTitle');
+
+        function openSheet(id, title) {
+            currentEditingId = id;
+            titleDisplay.textContent = title;
+            sheet.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        overlay.onclick = () => {
+            sheet.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function updateLamp(status) {
+            if (currentEditingId) {
+                userLamps[currentEditingId] = status;
+                localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
+                applyFilters(); // 更新後に現在のフィルタ状態で再描画
+                updateProgress();
+            }
+            sheet.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function updateProgress() {
+            // ☆10全体のハードクリア率
+            const level10s = songs.filter(s => s.official_level === 10);
+            const level10Hard = level10s.filter(s => {
+                const rank = lampRank[userLamps[s.id] || 'NP'];
+                return rank >= 5; // HARD以上
+            }).length;
+            
+            const p10 = level10s.length > 0 ? Math.round((level10Hard / level10s.length) * 100) : 0;
+            document.getElementById('prog-text-10').innerText = `☆10 HARD: ${p10}% (${level10Hard}/${level10s.length})`;
+            document.getElementById('prog-bar-10').style.width = `${p10}%`;
+
+            // ☆11全体のクリア率（AE以上）
+            const level11s = songs.filter(s => s.official_level === 11);
+            const level11Clear = level11s.filter(s => {
+                const rank = lampRank[userLamps[s.id] || 'NP'];
+                return rank >= 2; // AE以上
+            }).length;
+
+            const p11 = level11s.length > 0 ? Math.round((level11Clear / level11s.length) * 100) : 0;
+            document.getElementById('prog-text-11').innerText = `☆11 CLEAR: ${p11}% (${level11Clear}/${level11s.length})`;
+            document.getElementById('prog-bar-11').style.width = `${p11}%`;
+        }
+
+        function exportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,ID,曲名,公式レベル,非公式レベル,ランプ\n";
+            songs.forEach(s => {
+                const lamp = userLamps[s.id] || 'NP';
+                csvContent += `${s.id},"${s.title}",${s.official_level},${s.level},${lamp}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "iidx_dp_lamps.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        init();
+    </script>
+</body>
+</html>
