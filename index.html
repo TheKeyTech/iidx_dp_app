@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIDX DP KAIDEN</title>
+    <title>DP CLEARMANAGER</title>
     <style>
         :root {
-            /* ランプのテーマカラー設定 */
             --color-np: #666666;
             --color-f: #ff3333;
             --color-ae: #cc33ff;
@@ -19,17 +18,36 @@
             --panel-bg: rgba(30, 35, 45, 0.7);
         }
 
+        /* 画面全体を固定し、スクロールを内部で行う設定 */
         body {
             background-color: var(--bg-color);
             color: #ffffff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 0;
             background-image: radial-gradient(circle at 50% 0%, #1a2332 0%, #0d0f12 60%);
             background-attachment: fixed;
+            height: 100dvh; /* スマホのバーを考慮した高さ */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* ヘッダー周り */
+        /* 上部の固定エリア */
+        .fixed-top-area {
+            padding: 15px 15px 0 15px;
+            flex-shrink: 0; /* 縮ませない */
+            z-index: 10;
+        }
+
+        /* スクロールするリストエリア */
+        .scrollable-list-area {
+            flex: 1; /* 残りの高さをすべて使う */
+            overflow-y: auto; /* 縦スクロールを許可 */
+            padding: 0 15px 15px 15px;
+            -webkit-overflow-scrolling: touch; /* iPhoneでの滑らかなスクロール（慣性） */
+        }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -52,7 +70,6 @@
             cursor: pointer;
         }
 
-        /* プログレスバーエリア */
         .progress-container {
             background: var(--panel-bg);
             border: 1px solid rgba(0, 255, 204, 0.3);
@@ -62,7 +79,7 @@
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
         }
         .progress-bar-wrap {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .progress-text {
             font-size: 12px;
@@ -83,7 +100,6 @@
             transition: width 0.5s ease-out;
         }
 
-        /* 検索とフィルタ */
         .search-box, .filter-select {
             width: 100%;
             padding: 12px;
@@ -103,7 +119,7 @@
         .preset-filters {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             overflow-x: auto;
             padding-bottom: 5px;
         }
@@ -122,12 +138,17 @@
             transform: scale(0.95);
         }
 
-        /* 楽曲リスト */
+        .list-summary {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
         .song-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding-bottom: 100px;
+            padding-bottom: 20px;
         }
         .song-card {
             background: var(--panel-bg);
@@ -153,14 +174,8 @@
             border-radius: 4px;
             background: var(--color-np);
         }
-        .list-summary {
-            text-align: center;
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 10px;
-        }
 
-        /* ボトムシート（ランプ入力用ポップアップ） */
+        /* ボトムシート */
         .bottom-sheet {
             position: fixed;
             bottom: -100%;
@@ -234,53 +249,59 @@
 </head>
 <body>
 
-    <div class="header">
-        <h1>IIDX DP KAIDEN</h1>
-        <button class="btn-export" onclick="exportCSV()">エクスポート</button>
-    </div>
-
-    <!-- プログレスバー -->
-    <div class="progress-container">
-        <div class="progress-bar-wrap">
-            <div class="progress-text" id="prog-text-10">LEVEL 10.x HARD: 計算中...</div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-10"></div></div>
+    <!-- 上部固定エリア -->
+    <div class="fixed-top-area">
+        <div class="header">
+            <h1>DP CLEARMANAGER</h1>
+            <button class="btn-export" onclick="exportCSV()">エクスポート</button>
         </div>
-        <div class="progress-bar-wrap" style="margin-bottom:0;">
-            <div class="progress-text" id="prog-text-11">LEVEL 11.x CLEAR: 計算中...</div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-11" style="background: linear-gradient(90deg, #33ccff, #00ffcc); box-shadow: 0 0 10px #00ffcc;"></div></div>
+
+        <div class="progress-container">
+            <div class="progress-bar-wrap">
+                <div class="progress-text" id="prog-text-10">☆10 CLEAR: 計算中...</div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-10"></div></div>
+            </div>
+            <div class="progress-bar-wrap">
+                <div class="progress-text" id="prog-text-11">☆11 CLEAR: 計算中...</div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-11" style="background: linear-gradient(90deg, #33ccff, #00ffcc); box-shadow: 0 0 10px #00ffcc;"></div></div>
+            </div>
+            <div class="progress-bar-wrap" style="margin-bottom:0;">
+                <div class="progress-text" id="prog-text-12">☆12 CLEAR: 計算中...</div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-12" style="background: linear-gradient(90deg, #cc33ff, #ff3399); box-shadow: 0 0 10px #cc33ff;"></div></div>
+            </div>
         </div>
+
+        <input type="text" class="search-box" placeholder="曲名で検索..." id="searchInput">
+
+        <div class="preset-filters">
+            <button class="filter-btn" onclick="applyPreset('ALL', 'NOT_CLEAR')">未クリア</button>
+            <button class="filter-btn" style="border-color:#ffcc00; color:#ffcc00;" onclick="applyPreset('11.0_11.8', 'NOT_CLEAR')">12.0未満 未クリア</button>
+            <button class="filter-btn" style="border-color:#cc33ff; color:#cc33ff;" onclick="applyPreset('12.0_OVER', 'NOT_CLEAR')">12.0以上 挑戦(未クリア)</button>
+        </div>
+
+        <div class="filter-group">
+            <select id="filterLevel" class="filter-select">
+                <option value="ALL">非公式 全て</option>
+            </select>
+            <select id="filterLamp" class="filter-select">
+                <option value="ALL">ランプ 全て</option>
+                <option value="NOT_CLEAR">未クリア (NP/F)</option>
+                <option value="NOT_HARD">未難 (NP/F/AE/E/N)</option>
+                <option value="NOT_EXH">未EXH (HARD以下)</option>
+                <option value="CLEAR">クリア済 (AE以上)</option>
+                <option value="HARD">HARD以上</option>
+                <option value="EXH">EXH以上</option>
+            </select>
+        </div>
+
+        <div class="list-summary" id="listSummary">読み込み中...</div>
     </div>
 
-    <!-- 検索とマイフィルタ（プリセット） -->
-    <input type="text" class="search-box" placeholder="曲名で検索..." id="searchInput">
-
-    <div class="preset-filters">
-        <button class="filter-btn" onclick="applyPreset('10.5', 'NOT_HARD')">10.5 未難</button>
-        <button class="filter-btn" style="border-color:#ffcc00; color:#ffcc00;" onclick="applyPreset('11.0', 'NOT_CLEAR')">11.0 未クリア</button>
-        <button class="filter-btn" style="border-color:#cc33ff; color:#cc33ff;" onclick="applyPreset('12.0_OVER', 'NOT_HARD')">☆12 挑戦(未難)</button>
+    <!-- 下部スクロールエリア -->
+    <div class="scrollable-list-area">
+        <div class="song-list" id="songList"></div>
     </div>
 
-    <!-- 絞り込みドロップダウン -->
-    <div class="filter-group">
-        <select id="filterLevel" class="filter-select">
-            <option value="ALL">非公式 全て</option>
-            <!-- JSで動的に追加 -->
-        </select>
-        <select id="filterLamp" class="filter-select">
-            <option value="ALL">ランプ 全て</option>
-            <option value="NOT_CLEAR">未クリア (NP/F)</option>
-            <option value="NOT_HARD">未難 (NP/F/AE/E/N)</option>
-            <option value="NOT_EXH">未EXH (HARD以下)</option>
-            <option value="CLEAR">クリア済 (AE以上)</option>
-            <option value="HARD">HARD以上</option>
-            <option value="EXH">EXH以上</option>
-        </select>
-    </div>
-
-    <div class="list-summary" id="listSummary">読み込み中...</div>
-    <div class="song-list" id="songList"></div>
-
-    <!-- ランプ入力ポップアップ -->
     <div class="overlay" id="overlay"></div>
     <div class="bottom-sheet" id="bottomSheet">
         <div class="sheet-title">ランプ更新</div>
@@ -302,16 +323,11 @@
         let userLamps = JSON.parse(localStorage.getItem('iidx_dp_lamps')) || {};
         let currentEditingId = null;
 
-        // 初期化
         async function init() {
             try {
                 const res = await fetch('master_data.json');
                 songs = await res.json();
-                
-                // 存在する非公式レベルを抽出してドロップダウンに追加
                 populateLevelFilter();
-                
-                // 初期表示（全件出すと重いのでフィルタ適用状態を描画）
                 applyFilters();
                 updateProgress();
             } catch (error) {
@@ -319,18 +335,15 @@
             }
         }
 
-        // 存在する非公式レベル(10.2, 10.5等)を抽出してセレクトボックスを構築
         function populateLevelFilter() {
             const levelSelect = document.getElementById('filterLevel');
-            // 重複を排除して数値をソート
             const levels = [...new Set(songs.map(s => s.level))].sort((a, b) => a - b);
             
             levelSelect.innerHTML = '<option value="ALL">非公式 全て</option>';
-            levelSelect.innerHTML += '<option value="12.0_OVER">☆12 (12.0以上)</option>'; // プリセット用の特別枠
+            levelSelect.innerHTML += '<option value="12.0_OVER">☆12 (12.0以上)</option>';
             
             levels.forEach(lv => {
                 const option = document.createElement('option');
-                // 10.0 のように小数点第1位まで表示
                 const displayLv = Number.isInteger(lv) ? lv.toFixed(1) : lv;
                 option.value = lv;
                 option.textContent = `非公式 ${displayLv}`;
@@ -338,10 +351,8 @@
             });
         }
 
-        // ランプのランク（判定用）
         const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
 
-        // フィルタ条件を適用して描画
         function applyFilters() {
             const searchWord = document.getElementById('searchInput').value.toLowerCase();
             const filterLv = document.getElementById('filterLevel').value;
@@ -354,10 +365,14 @@
                 // 1. 検索文字列フィルタ
                 if (searchWord && !s.title.toLowerCase().includes(searchWord)) return false;
 
-                // 2. 非公式レベルフィルタ
+                // 2. 非公式レベルフィルタ（拡張版）
                 if (filterLv !== 'ALL') {
                     if (filterLv === '12.0_OVER') {
                         if (s.level < 12.0) return false;
+                    } else if (filterLv.includes('_')) {
+                        // 「10.0_11.5」のような範囲指定の処理
+                        const [minLv, maxLv] = filterLv.split('_').map(Number);
+                        if (s.level < minLv || s.level > maxLv) return false;
                     } else if (s.level !== parseFloat(filterLv)) {
                         return false;
                     }
@@ -365,10 +380,10 @@
 
                 // 3. ランプ状態フィルタ
                 if (filterLamp !== 'ALL') {
-                    if (filterLamp === 'NOT_CLEAR' && rank >= 2) return false; // AE以上を除外
-                    if (filterLamp === 'NOT_HARD' && rank >= 5) return false;  // HARD以上を除外
-                    if (filterLamp === 'NOT_EXH' && rank >= 6) return false;   // EXH以上を除外
-                    if (filterLamp === 'CLEAR' && rank < 2) return false;      // NP/Fを除外
+                    if (filterLamp === 'NOT_CLEAR' && rank >= 2) return false;
+                    if (filterLamp === 'NOT_HARD' && rank >= 5) return false;
+                    if (filterLamp === 'NOT_EXH' && rank >= 6) return false;
+                    if (filterLamp === 'CLEAR' && rank < 2) return false;
                     if (filterLamp === 'HARD' && rank < 5) return false;
                     if (filterLamp === 'EXH' && rank < 6) return false;
                 }
@@ -379,25 +394,43 @@
             renderList(filteredSongs);
         }
 
-        // マイフィルタ（プリセットボタン）の実行
         function applyPreset(levelVal, lampVal) {
-            document.getElementById('filterLevel').value = levelVal;
-            document.getElementById('filterLamp').value = lampVal;
+            const levelSelect = document.getElementById('filterLevel');
+            const lampSelect = document.getElementById('filterLamp');
+            
+            // ドロップダウンに存在しない値（範囲指定など）が来た場合、動的に選択肢を追加する
+            let optionExists = false;
+            for (let i = 0; i < levelSelect.options.length; i++) {
+                if (levelSelect.options[i].value === levelVal) {
+                    optionExists = true;
+                    break;
+                }
+            }
+            if (!optionExists) {
+                const newOption = document.createElement('option');
+                newOption.value = levelVal;
+                // 表示名を見やすく変換（例: "11.0_11.8" -> "非公式 11.0 〜 11.8"）
+                if (levelVal.includes('_') && levelVal !== '12.0_OVER') {
+                    const [min, max] = levelVal.split('_');
+                    newOption.textContent = `非公式 ${min} 〜 ${max}`;
+                } else {
+                    newOption.textContent = `特殊フィルタ`;
+                }
+                levelSelect.appendChild(newOption);
+            }
+
+            // 安全に値をセット
+            levelSelect.value = levelVal;
+            lampSelect.value = lampVal;
+            
             applyFilters();
         }
-
-        // イベントリスナーの登録
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('filterLevel').addEventListener('change', applyFilters);
-        document.getElementById('filterLamp').addEventListener('change', applyFilters);
-
-        // リストの描画
+        
         function renderList(targetSongs) {
             const listEl = document.getElementById('songList');
             const summaryEl = document.getElementById('listSummary');
             listEl.innerHTML = '';
             
-            // 件数表示
             summaryEl.textContent = `${targetSongs.length} 曲表示中 (全 ${songs.length} 曲)`;
 
             targetSongs.forEach(song => {
@@ -407,7 +440,6 @@
                 let lampColor = `var(--color-${lamp.toLowerCase()})`;
                 if(lamp === 'NP') lampColor = '#333';
 
-                // ★ 公式難度をメインに、非公式難度を並記する表示に変更
                 const displayLv = Number.isInteger(song.level) ? song.level.toFixed(1) : song.level;
                 
                 div.innerHTML = `
@@ -418,7 +450,6 @@
                     <div class="lamp-indicator" style="background: ${lampColor}; box-shadow: 0 0 10px ${lampColor};"></div>
                 `;
                 
-                // タップでポップアップを開き、タイトルを渡す
                 div.onclick = () => openSheet(song.id, song.title);
                 listEl.appendChild(div);
             });
@@ -444,7 +475,7 @@
             if (currentEditingId) {
                 userLamps[currentEditingId] = status;
                 localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
-                applyFilters(); // 更新後に現在のフィルタ状態で再描画
+                applyFilters();
                 updateProgress();
             }
             sheet.classList.remove('active');
@@ -452,27 +483,28 @@
         }
 
         function updateProgress() {
-            // ☆10全体のハードクリア率
+            const isCleared = (songId) => {
+                const rank = lampRank[userLamps[songId] || 'NP'];
+                return rank >= 3;
+            };
+
             const level10s = songs.filter(s => s.official_level === 10);
-            const level10Hard = level10s.filter(s => {
-                const rank = lampRank[userLamps[s.id] || 'NP'];
-                return rank >= 5; // HARD以上
-            }).length;
-            
-            const p10 = level10s.length > 0 ? Math.round((level10Hard / level10s.length) * 100) : 0;
-            document.getElementById('prog-text-10').innerText = `☆10 HARD: ${p10}% (${level10Hard}/${level10s.length})`;
+            const level10Clear = level10s.filter(s => isCleared(s.id)).length;
+            const p10 = level10s.length > 0 ? Math.round((level10Clear / level10s.length) * 100) : 0;
+            document.getElementById('prog-text-10').innerText = `☆10 CLEAR: ${p10}% (${level10Clear}/${level10s.length})`;
             document.getElementById('prog-bar-10').style.width = `${p10}%`;
 
-            // ☆11全体のクリア率（AE以上）
             const level11s = songs.filter(s => s.official_level === 11);
-            const level11Clear = level11s.filter(s => {
-                const rank = lampRank[userLamps[s.id] || 'NP'];
-                return rank >= 2; // AE以上
-            }).length;
-
+            const level11Clear = level11s.filter(s => isCleared(s.id)).length;
             const p11 = level11s.length > 0 ? Math.round((level11Clear / level11s.length) * 100) : 0;
             document.getElementById('prog-text-11').innerText = `☆11 CLEAR: ${p11}% (${level11Clear}/${level11s.length})`;
             document.getElementById('prog-bar-11').style.width = `${p11}%`;
+            
+            const level12s = songs.filter(s => s.official_level === 12);
+            const level12Clear = level12s.filter(s => isCleared(s.id)).length;
+            const p12 = level12s.length > 0 ? Math.round((level12Clear / level12s.length) * 100) : 0;
+            document.getElementById('prog-text-12').innerText = `☆12 CLEAR: ${p12}% (${level12Clear}/${level12s.length})`;
+            document.getElementById('prog-bar-12').style.width = `${p12}%`;
         }
 
         function exportCSV() {
