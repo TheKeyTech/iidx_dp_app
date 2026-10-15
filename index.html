@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIDX DP KAIDEN</title>
+    <title>IIDX DP CLEARMANAGER</title>
     <style>
         :root {
             --color-np: #666666;
@@ -49,13 +49,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .header h1 {
             margin: 0;
             font-size: 24px;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             letter-spacing: 1px;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
         }
         .btn-export {
             background: rgba(255, 255, 255, 0.1);
@@ -65,36 +69,76 @@
             border-radius: 8px;
             font-size: 12px;
             cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-export:active {
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .progress-container {
+        /* ダッシュボード（円グラフ）用スタイル */
+        .dashboard-container {
             background: var(--panel-bg);
             border: 1px solid rgba(0, 255, 204, 0.3);
             border-radius: 12px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
-        .progress-bar-wrap {
-            margin-bottom: 12px;
+        .chart-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            flex-shrink: 0;
         }
-        .progress-text {
-            font-size: 12px;
-            margin-bottom: 5px;
+        .donut-chart {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            /* JavaScriptで背景を conic-gradient に上書きします */
+            background: conic-gradient(var(--color-np) 0% 100%);
+            /* 真ん中をくり抜いてドーナツ型にする (iOS Safari対応) */
+            -webkit-mask-image: radial-gradient(circle, transparent 55%, black 56%);
+            mask-image: radial-gradient(circle, transparent 55%, black 56%);
+            transition: background 0.5s ease-out;
+        }
+        .chart-center-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            line-height: 1.2;
+        }
+        .chart-center-text .val {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+        .chart-center-text .lbl {
+            font-size: 10px;
             color: #aaa;
         }
-        .progress-bar-bg {
-            background: rgba(255, 255, 255, 0.1);
-            height: 6px;
-            border-radius: 3px;
-            overflow: hidden;
+        .chart-legend {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px 5px;
         }
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff5500, #ffcc00);
-            box-shadow: 0 0 10px #ffcc00;
-            width: 0%;
-            transition: width 0.5s ease-out;
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #ddd;
+        }
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
 
         .search-box, .filter-select {
@@ -119,6 +163,7 @@
             margin-bottom: 15px;
             overflow-x: auto;
             padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
         }
         .filter-btn {
             background: rgba(0, 0, 0, 0.3);
@@ -248,21 +293,24 @@
     <div class="fixed-top-area">
         <div class="header">
             <h1>DP CLEARMANAGER</h1>
-            <button class="btn-export" onclick="exportCSV()">エクスポート</button>
+            <div class="header-buttons">
+                <button class="btn-export" style="background: rgba(0, 255, 204, 0.1); border-color: rgba(0, 255, 204, 0.3);" onclick="document.getElementById('importFile').click()">読込</button>
+                <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importCSV(event)">
+                <button class="btn-export" onclick="exportCSV()">保存</button>
+            </div>
         </div>
 
-        <div class="progress-container">
-            <div class="progress-bar-wrap">
-                <div class="progress-text" id="prog-text-10">☆10 CLEAR: 計算中...</div>
-                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-10"></div></div>
+        <!-- 進捗ダッシュボード（円グラフ） -->
+        <div class="dashboard-container">
+            <div class="chart-wrapper">
+                <div class="donut-chart" id="lampChart"></div>
+                <div class="chart-center-text">
+                    <div class="lbl">CLEAR</div>
+                    <div class="val" id="chartClearRate">0%</div>
+                </div>
             </div>
-            <div class="progress-bar-wrap">
-                <div class="progress-text" id="prog-text-11">☆11 CLEAR: 計算中...</div>
-                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-11" style="background: linear-gradient(90deg, #33ccff, #00ffcc); box-shadow: 0 0 10px #00ffcc;"></div></div>
-            </div>
-            <div class="progress-bar-wrap" style="margin-bottom:0;">
-                <div class="progress-text" id="prog-text-12">☆12 CLEAR: 計算中...</div>
-                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-12" style="background: linear-gradient(90deg, #cc33ff, #ff3399); box-shadow: 0 0 10px #cc33ff;"></div></div>
+            <div class="chart-legend" id="chartLegend">
+                <!-- JSで凡例を生成します -->
             </div>
         </div>
 
@@ -271,7 +319,7 @@
         <div class="preset-filters">
             <button class="filter-btn" onclick="applyPreset('ALL', 'NOT_CLEAR')">未クリア</button>
             <button class="filter-btn" style="border-color:#ffcc00; color:#ffcc00;" onclick="applyPreset('11.0_11.8', 'NOT_CLEAR')">12.0未満 未クリア</button>
-            <button class="filter-btn" style="border-color:#cc33ff; color:#cc33ff;" onclick="applyPreset('12.0_OVER', 'NOT_CLEAR')">12.0以上 挑戦(未クリア)</button>
+            <button class="filter-btn" style="border-color:#cc33ff; color:#cc33ff;" onclick="applyPreset('12.0_OVER', 'NOT_CLEAR')">12.0以上 挑戦</button>
         </div>
 
         <div class="filter-group">
@@ -317,13 +365,26 @@
         let userLamps = JSON.parse(localStorage.getItem('iidx_dp_lamps')) || {};
         let currentEditingId = null;
 
+        const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
+        
+        // CSS変数と連動するカラーマップ
+        const lampColors = {
+            'NP': '#666666', 'F': '#ff3333', 'AE': '#cc33ff', 'E': '#33ff33',
+            'N': '#33ccff', 'HARD': '#ff5500', 'EXH': '#ffcc00', 'FC': '#00ffcc'
+        };
+
+        const officialLampMap = {
+            'FULLCOMBO CLEAR': 'FC', 'EX HARD CLEAR': 'EXH', 'HARD CLEAR': 'HARD',
+            'CLEAR': 'N', 'EASY CLEAR': 'E', 'ASSIST CLEAR': 'AE',
+            'FAILED': 'F', 'NO PLAY': 'NP', '---': 'NP'
+        };
+
         async function init() {
             try {
                 const res = await fetch('master_data.json');
                 songs = await res.json();
                 populateLevelFilter();
                 applyFilters();
-                updateProgress();
             } catch (error) {
                 document.getElementById('songList').innerHTML = `<p style="color:red; text-align:center;">master_data.jsonの読み込みに失敗しました。</p>`;
             }
@@ -345,19 +406,16 @@
             });
         }
 
-        const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
-
         function applyFilters() {
-            // 前後の空白を削除して小文字化
             const searchWord = document.getElementById('searchInput').value.trim().toLowerCase();
             const filterLv = document.getElementById('filterLevel').value;
             const filterLamp = document.getElementById('filterLamp').value;
 
+            // フィルター適用処理
             const filteredSongs = songs.filter(s => {
                 const lamp = userLamps[s.id] || 'NP';
                 const rank = lampRank[lamp];
 
-                // 前方一致 (startsWith) に変更。「The」の特殊処理は行わない
                 if (searchWord && !s.title.toLowerCase().startsWith(searchWord)) return false;
 
                 if (filterLv !== 'ALL') {
@@ -372,15 +430,10 @@
                 }
 
                 if (filterLamp !== 'ALL') {
-                    // AE(2)までは未クリア扱いとし、E(3)以上を除外する
                     if (filterLamp === 'NOT_CLEAR' && rank >= 3) return false;
-                    
                     if (filterLamp === 'NOT_HARD' && rank >= 5) return false;
                     if (filterLamp === 'NOT_EXH' && rank >= 6) return false;
-                    
-                    // E(3) と N(4) のみ表示。3未満と5以上を除外する
                     if (filterLamp === 'CLEAR' && (rank < 3 || rank >= 5)) return false;
-                    
                     if (filterLamp === 'HARD' && rank < 5) return false;
                     if (filterLamp === 'EXH' && rank < 6) return false;
                 }
@@ -389,6 +442,7 @@
             });
 
             renderList(filteredSongs);
+            updateDashboard(filterLv); // リスト更新と同時にダッシュボードも更新
         }
 
         function applyPreset(levelVal, lampVal) {
@@ -398,8 +452,7 @@
             let optionExists = false;
             for (let i = 0; i < levelSelect.options.length; i++) {
                 if (levelSelect.options[i].value === levelVal) {
-                    optionExists = true;
-                    break;
+                    optionExists = true; break;
                 }
             }
             if (!optionExists) {
@@ -413,7 +466,6 @@
                 }
                 levelSelect.appendChild(newOption);
             }
-
             levelSelect.value = levelVal;
             lampSelect.value = lampVal;
             applyFilters();
@@ -423,7 +475,6 @@
             const listEl = document.getElementById('songList');
             const summaryEl = document.getElementById('listSummary');
             listEl.innerHTML = '';
-            
             summaryEl.textContent = `${targetSongs.length} 曲表示中 (全 ${songs.length} 曲)`;
 
             targetSongs.forEach(song => {
@@ -448,6 +499,77 @@
             });
         }
 
+        // ==========================================
+        // 【新規】 ダッシュボード（円グラフ）更新処理
+        // ==========================================
+        function updateDashboard(filterLv) {
+            // 現在選択されている「レベル」に属する全曲を取得（ランプ絞り込みは無視する）
+            const targetSongs = songs.filter(s => {
+                if (filterLv !== 'ALL') {
+                    if (filterLv === '12.0_OVER') {
+                        if (s.level < 12.0) return false;
+                    } else if (filterLv.includes('_')) {
+                        const [minLv, maxLv] = filterLv.split('_').map(Number);
+                        if (s.level < minLv || s.level > maxLv) return false;
+                    } else if (s.level !== parseFloat(filterLv)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            const total = targetSongs.length;
+            if (total === 0) return;
+
+            // ランプの集計
+            const counts = { 'FC':0, 'EXH':0, 'HARD':0, 'N':0, 'E':0, 'AE':0, 'F':0, 'NP':0 };
+            let clearCount = 0; // EASY(ランク3)以上をクリアとする
+
+            targetSongs.forEach(s => {
+                const lamp = userLamps[s.id] || 'NP';
+                counts[lamp]++;
+                if (lampRank[lamp] >= 3) {
+                    clearCount++;
+                }
+            });
+
+            // 円グラフの描画用文字列（conic-gradient）の生成
+            let gradientString = [];
+            let currentPercent = 0;
+            let legendHTML = '';
+
+            // グラフの描画順（FCから順に描画）
+            const drawOrder = ['FC', 'EXH', 'HARD', 'N', 'E', 'AE', 'F', 'NP'];
+
+            drawOrder.forEach(lamp => {
+                const count = counts[lamp];
+                const percent = (count / total) * 100;
+                
+                if (count > 0) {
+                    gradientString.push(`${lampColors[lamp]} ${currentPercent}% ${currentPercent + percent}%`);
+                    currentPercent += percent;
+                }
+
+                // 凡例（0件のものもグレーアウト等せず表示しておくとモチベーションに繋がります）
+                legendHTML += `
+                    <div class="legend-item" style="opacity: ${count > 0 ? '1' : '0.4'};">
+                        <div class="legend-color" style="background: ${lampColors[lamp]}; box-shadow: 0 0 5px ${lampColors[lamp]};"></div>
+                        <span>${lamp}: ${count}</span>
+                    </div>
+                `;
+            });
+
+            // CSSの background を動的に書き換えて円グラフを更新
+            document.getElementById('lampChart').style.background = `conic-gradient(${gradientString.join(', ')})`;
+            
+            // 中央のクリア率テキストを更新
+            const clearRate = Math.round((clearCount / total) * 100);
+            document.getElementById('chartClearRate').innerText = `${clearRate}%`;
+            
+            // 凡例を更新
+            document.getElementById('chartLegend').innerHTML = legendHTML;
+        }
+
         const sheet = document.getElementById('bottomSheet');
         const overlay = document.getElementById('overlay');
         const titleDisplay = document.getElementById('popupSongTitle');
@@ -468,51 +590,178 @@
             if (currentEditingId) {
                 userLamps[currentEditingId] = status;
                 localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
-                applyFilters();
-                updateProgress();
+                applyFilters(); // リストとダッシュボードが再描画されます
             }
             sheet.classList.remove('active');
             overlay.classList.remove('active');
         }
 
-        function updateProgress() {
-            const isCleared = (songId) => {
-                const rank = lampRank[userLamps[songId] || 'NP'];
-                return rank >= 3;
-            };
-
-            const level10s = songs.filter(s => s.official_level === 10);
-            const level10Clear = level10s.filter(s => isCleared(s.id)).length;
-            const p10 = level10s.length > 0 ? Math.round((level10Clear / level10s.length) * 100) : 0;
-            document.getElementById('prog-text-10').innerText = `☆10 CLEAR: ${p10}% (${level10Clear}/${level10s.length})`;
-            document.getElementById('prog-bar-10').style.width = `${p10}%`;
-
-            const level11s = songs.filter(s => s.official_level === 11);
-            const level11Clear = level11s.filter(s => isCleared(s.id)).length;
-            const p11 = level11s.length > 0 ? Math.round((level11Clear / level11s.length) * 100) : 0;
-            document.getElementById('prog-text-11').innerText = `☆11 CLEAR: ${p11}% (${level11Clear}/${level11s.length})`;
-            document.getElementById('prog-bar-11').style.width = `${p11}%`;
-            
-            const level12s = songs.filter(s => s.official_level === 12);
-            const level12Clear = level12s.filter(s => isCleared(s.id)).length;
-            const p12 = level12s.length > 0 ? Math.round((level12Clear / level12s.length) * 100) : 0;
-            document.getElementById('prog-text-12').innerText = `☆12 CLEAR: ${p12}% (${level12Clear}/${level12s.length})`;
-            document.getElementById('prog-bar-12').style.width = `${p12}%`;
-        }
-
+        // CSVエクスポート
         function exportCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,ID,曲名,公式レベル,非公式レベル,ランプ\n";
+            let csvContent = "ID,曲名,公式レベル,非公式レベル,ランプ\n";
             songs.forEach(s => {
                 const lamp = userLamps[s.id] || 'NP';
                 csvContent += `${s.id},"${s.title}",${s.official_level},${s.level},${lamp}\n`;
             });
-            const encodedUri = encodeURI(csvContent);
+
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", url);
             link.setAttribute("download", "iidx_dp_lamps.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // CSVパース関数
+        function parseCSVLine(str) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < str.length; i++) {
+                const char = str[i];
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (i + 1 < str.length && str[i + 1] === '"') {
+                            current += '"'; i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        result.push(current); current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            result.push(current);
+            return result;
+        }
+
+        // 公式CSV連携処理
+        function processOfficialCSV(lines) {
+            const header = parseCSVLine(lines[0]);
+            const titleIdx = header.indexOf('タイトル');
+            const hyperIdx = header.indexOf('HYPER クリアタイプ');
+            const anotherIdx = header.indexOf('ANOTHER クリアタイプ');
+            const leggendariaIdx = header.indexOf('LEGGENDARIA クリアタイプ');
+
+            if (titleIdx === -1) {
+                alert('公式CSVのフォーマットが正しくありません。（「タイトル」列が見つかりません）');
+                return;
+            }
+
+            const csvData = {};
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cols = parseCSVLine(line);
+                if (cols.length > titleIdx) {
+                    csvData[cols[titleIdx]] = cols;
+                }
+            }
+
+            let updateCount = 0;
+
+            songs.forEach(song => {
+                let baseTitle = song.title;
+                let diffType = '';
+                
+                const suffixIdx = song.title.lastIndexOf(' [');
+                if (suffixIdx !== -1) {
+                    baseTitle = song.title.substring(0, suffixIdx);
+                    diffType = song.title.substring(suffixIdx + 2, song.title.length - 1);
+                }
+
+                const row = csvData[baseTitle];
+                if (row) {
+                    let offLampStr = null;
+                    if (diffType === 'H' && hyperIdx !== -1) offLampStr = row[hyperIdx];
+                    else if (diffType === 'A' && anotherIdx !== -1) offLampStr = row[anotherIdx];
+                    else if (diffType === 'L' && leggendariaIdx !== -1) offLampStr = row[leggendariaIdx];
+
+                    if (offLampStr) {
+                        const newLamp = officialLampMap[offLampStr];
+                        if (newLamp && newLamp !== 'NP') { 
+                            userLamps[song.id] = newLamp;
+                            updateCount++;
+                        }
+                    }
+                }
+            });
+
+            localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
+            applyFilters();
+            alert(`公式プレイデータから ${updateCount} 譜面のランプを同期・更新しました！`);
+        }
+
+        // 当アプリのバックアップ復元処理
+        function processBackupCSV(lines) {
+            const newLamps = {};
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const firstCommaIdx = line.indexOf(',');
+                const lastCommaIdx = line.lastIndexOf(',');
+                if (firstCommaIdx !== -1 && lastCommaIdx !== -1 && firstCommaIdx !== lastCommaIdx) {
+                    const id = line.substring(0, firstCommaIdx);
+                    const lamp = line.substring(lastCommaIdx + 1);
+                    newLamps[id] = lamp;
+                }
+            }
+            userLamps = newLamps;
+            localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
+            applyFilters();
+            alert('バックアップデータの復元が完了しました！');
+        }
+
+        // インポート（ファイル読込）
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!confirm('データを読み込みます。既存のランプ状態は上書き更新されます。よろしいですか？')) {
+                event.target.value = ''; 
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const buffer = e.target.result;
+                
+                let text = new TextDecoder('utf-8').decode(buffer);
+                let lines = text.split(/\r\n|\n/);
+                
+                if (lines[0] && lines[0].startsWith('ID')) {
+                    processBackupCSV(lines);
+                    event.target.value = '';
+                    return;
+                }
+
+                text = new TextDecoder('shift-jis').decode(buffer);
+                lines = text.split(/\r\n|\n/);
+
+                if (lines[0] && lines[0].includes('タイトル')) {
+                    processOfficialCSV(lines);
+                } else {
+                    alert('対応していないファイル形式です。\n当アプリのバックアップファイル、またはe-amusement公式のプレイデータCSVを選択してください。');
+                }
+                
+                event.target.value = '';
+            };
+            
+            reader.readAsArrayBuffer(file);
         }
 
         init();
