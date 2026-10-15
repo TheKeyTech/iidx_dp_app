@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DP CLEARMANAGER</title>
+    <title>IIDX DP KAIDEN</title>
     <style>
         :root {
             --color-np: #666666;
@@ -18,7 +18,6 @@
             --panel-bg: rgba(30, 35, 45, 0.7);
         }
 
-        /* 画面全体を固定し、スクロールを内部で行う設定 */
         body {
             background-color: var(--bg-color);
             color: #ffffff;
@@ -27,25 +26,23 @@
             padding: 0;
             background-image: radial-gradient(circle at 50% 0%, #1a2332 0%, #0d0f12 60%);
             background-attachment: fixed;
-            height: 100dvh; /* スマホのバーを考慮した高さ */
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* 上部の固定エリア */
         .fixed-top-area {
             padding: 15px 15px 0 15px;
-            flex-shrink: 0; /* 縮ませない */
+            flex-shrink: 0;
             z-index: 10;
         }
 
-        /* スクロールするリストエリア */
         .scrollable-list-area {
-            flex: 1; /* 残りの高さをすべて使う */
-            overflow-y: auto; /* 縦スクロールを許可 */
+            flex: 1;
+            overflow-y: auto;
             padding: 0 15px 15px 15px;
-            -webkit-overflow-scrolling: touch; /* iPhoneでの滑らかなスクロール（慣性） */
+            -webkit-overflow-scrolling: touch;
         }
 
         .header {
@@ -175,7 +172,6 @@
             background: var(--color-np);
         }
 
-        /* ボトムシート */
         .bottom-sheet {
             position: fixed;
             bottom: -100%;
@@ -249,7 +245,6 @@
 </head>
 <body>
 
-    <!-- 上部固定エリア -->
     <div class="fixed-top-area">
         <div class="header">
             <h1>DP CLEARMANAGER</h1>
@@ -271,7 +266,7 @@
             </div>
         </div>
 
-        <input type="text" class="search-box" placeholder="曲名で検索..." id="searchInput">
+        <input type="text" class="search-box" placeholder="曲名で検索..." id="searchInput" oninput="applyFilters()">
 
         <div class="preset-filters">
             <button class="filter-btn" onclick="applyPreset('ALL', 'NOT_CLEAR')">未クリア</button>
@@ -280,10 +275,10 @@
         </div>
 
         <div class="filter-group">
-            <select id="filterLevel" class="filter-select">
+            <select id="filterLevel" class="filter-select" onchange="applyFilters()">
                 <option value="ALL">非公式 全て</option>
             </select>
-            <select id="filterLamp" class="filter-select">
+            <select id="filterLamp" class="filter-select" onchange="applyFilters()">
                 <option value="ALL">ランプ 全て</option>
                 <option value="NOT_CLEAR">未クリア (NP/F)</option>
                 <option value="NOT_HARD">未難 (NP/F/AE/E/N)</option>
@@ -297,7 +292,6 @@
         <div class="list-summary" id="listSummary">読み込み中...</div>
     </div>
 
-    <!-- 下部スクロールエリア -->
     <div class="scrollable-list-area">
         <div class="song-list" id="songList"></div>
     </div>
@@ -362,15 +356,12 @@
                 const lamp = userLamps[s.id] || 'NP';
                 const rank = lampRank[lamp];
 
-                // 1. 検索文字列フィルタ
                 if (searchWord && !s.title.toLowerCase().includes(searchWord)) return false;
 
-                // 2. 非公式レベルフィルタ（拡張版）
                 if (filterLv !== 'ALL') {
                     if (filterLv === '12.0_OVER') {
                         if (s.level < 12.0) return false;
                     } else if (filterLv.includes('_')) {
-                        // 「10.0_11.5」のような範囲指定の処理
                         const [minLv, maxLv] = filterLv.split('_').map(Number);
                         if (s.level < minLv || s.level > maxLv) return false;
                     } else if (s.level !== parseFloat(filterLv)) {
@@ -378,7 +369,6 @@
                     }
                 }
 
-                // 3. ランプ状態フィルタ
                 if (filterLamp !== 'ALL') {
                     if (filterLamp === 'NOT_CLEAR' && rank >= 2) return false;
                     if (filterLamp === 'NOT_HARD' && rank >= 5) return false;
@@ -398,7 +388,6 @@
             const levelSelect = document.getElementById('filterLevel');
             const lampSelect = document.getElementById('filterLamp');
             
-            // ドロップダウンに存在しない値（範囲指定など）が来た場合、動的に選択肢を追加する
             let optionExists = false;
             for (let i = 0; i < levelSelect.options.length; i++) {
                 if (levelSelect.options[i].value === levelVal) {
@@ -409,7 +398,6 @@
             if (!optionExists) {
                 const newOption = document.createElement('option');
                 newOption.value = levelVal;
-                // 表示名を見やすく変換（例: "11.0_11.8" -> "非公式 11.0 〜 11.8"）
                 if (levelVal.includes('_') && levelVal !== '12.0_OVER') {
                     const [min, max] = levelVal.split('_');
                     newOption.textContent = `非公式 ${min} 〜 ${max}`;
@@ -419,13 +407,11 @@
                 levelSelect.appendChild(newOption);
             }
 
-            // 安全に値をセット
             levelSelect.value = levelVal;
             lampSelect.value = lampVal;
-            
             applyFilters();
         }
-        
+
         function renderList(targetSongs) {
             const listEl = document.getElementById('songList');
             const summaryEl = document.getElementById('listSummary');
