@@ -280,10 +280,10 @@
             </select>
             <select id="filterLamp" class="filter-select" onchange="applyFilters()">
                 <option value="ALL">ランプ 全て</option>
-                <option value="NOT_CLEAR">未クリア (NP/F)</option>
+                <option value="NOT_CLEAR">未クリア (NP/F/AE)</option>
                 <option value="NOT_HARD">未難 (NP/F/AE/E/N)</option>
                 <option value="NOT_EXH">未EXH (HARD以下)</option>
-                <option value="CLEAR">クリア済 (AE以上)</option>
+                <option value="CLEAR">クリア済 (E/N)</option>
                 <option value="HARD">HARD以上</option>
                 <option value="EXH">EXH以上</option>
             </select>
@@ -370,10 +370,15 @@
                 }
 
                 if (filterLamp !== 'ALL') {
-                    if (filterLamp === 'NOT_CLEAR' && rank >= 2) return false;
+                    // AE(2)までは未クリア扱いとし、E(3)以上を除外する
+                    if (filterLamp === 'NOT_CLEAR' && rank >= 3) return false;
+                    
                     if (filterLamp === 'NOT_HARD' && rank >= 5) return false;
                     if (filterLamp === 'NOT_EXH' && rank >= 6) return false;
-                    if (filterLamp === 'CLEAR' && rank < 2) return false;
+                    
+                    // E(3) と N(4) のみ表示。3未満と5以上を除外する
+                    if (filterLamp === 'CLEAR' && (rank < 3 || rank >= 5)) return false;
+                    
                     if (filterLamp === 'HARD' && rank < 5) return false;
                     if (filterLamp === 'EXH' && rank < 6) return false;
                 }
