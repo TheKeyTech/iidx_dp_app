@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIDX DP CLEARMANAGER</title>
+    <title>IIDX DP KAIDEN</title>
     <style>
         :root {
             --color-np: #666666;
@@ -51,12 +51,24 @@
             align-items: center;
             margin-bottom: 15px;
         }
-        .header h1 {
+        
+        /* 最終更新日表示用に追加 */
+        .header-title-area {
+            display: flex;
+            flex-direction: column;
+        }
+        .header-title-area h1 {
             margin: 0;
             font-size: 24px;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             letter-spacing: 1px;
         }
+        .header-title-area .last-updated {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
         .header-buttons {
             display: flex;
             gap: 10px;
@@ -75,7 +87,6 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        /* ダッシュボード（円グラフ）用スタイル */
         .dashboard-container {
             background: var(--panel-bg);
             border: 1px solid rgba(0, 255, 204, 0.3);
@@ -97,9 +108,7 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            /* JavaScriptで背景を conic-gradient に上書きします */
             background: conic-gradient(var(--color-np) 0% 100%);
-            /* 真ん中をくり抜いてドーナツ型にする (iOS Safari対応) */
             -webkit-mask-image: radial-gradient(circle, transparent 55%, black 56%);
             mask-image: radial-gradient(circle, transparent 55%, black 56%);
             transition: background 0.5s ease-out;
@@ -292,7 +301,11 @@
 
     <div class="fixed-top-area">
         <div class="header">
-            <h1>DP CLEARMANAGER</h1>
+            <!-- タイトルと最終更新日をグループ化 -->
+            <div class="header-title-area">
+                <h1>DP CLEARMANAGER</h1>
+                <div class="last-updated" id="lastUpdatedDisplay">難易度表 最終更新: 取得中...</div>
+            </div>
             <div class="header-buttons">
                 <button class="btn-export" style="background: rgba(0, 255, 204, 0.1); border-color: rgba(0, 255, 204, 0.3);" onclick="document.getElementById('importFile').click()">読込</button>
                 <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importCSV(event)">
@@ -300,7 +313,6 @@
             </div>
         </div>
 
-        <!-- 進捗ダッシュボード（円グラフ） -->
         <div class="dashboard-container">
             <div class="chart-wrapper">
                 <div class="donut-chart" id="lampChart"></div>
@@ -309,9 +321,7 @@
                     <div class="val" id="chartClearRate">0%</div>
                 </div>
             </div>
-            <div class="chart-legend" id="chartLegend">
-                <!-- JSで凡例を生成します -->
-            </div>
+            <div class="chart-legend" id="chartLegend"></div>
         </div>
 
         <input type="text" class="search-box" placeholder="曲名で検索..." id="searchInput" oninput="applyFilters()">
@@ -367,7 +377,6 @@
 
         const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
         
-        // CSS変数と連動するカラーマップ
         const lampColors = {
             'NP': '#666666', 'F': '#ff3333', 'AE': '#cc33ff', 'E': '#33ff33',
             'N': '#33ccff', 'HARD': '#ff5500', 'EXH': '#ffcc00', 'FC': '#00ffcc'
@@ -382,11 +391,22 @@
         async function init() {
             try {
                 const res = await fetch('master_data.json');
-                songs = await res.json();
+                const data = await res.json();
+                
+                // 新しいJSON構造に対応 (オブジェクトか配列かで分岐)
+                if (Array.isArray(data)) {
+                    songs = data;
+                    document.getElementById('lastUpdatedDisplay').innerText = '難易度表 最終更新: (旧フォーマット)';
+                } else {
+                    songs = data.songs;
+                    document.getElementById('lastUpdatedDisplay').innerText = `難易度表 最終更新: ${data.last_updated || '不明'}`;
+                }
+
                 populateLevelFilter();
                 applyFilters();
             } catch (error) {
                 document.getElementById('songList').innerHTML = `<p style="color:red; text-align:center;">master_data.jsonの読み込みに失敗しました。</p>`;
+                document.getElementById('lastUpdatedDisplay').innerText = '通信エラー';
             }
         }
 
@@ -411,7 +431,6 @@
             const filterLv = document.getElementById('filterLevel').value;
             const filterLamp = document.getElementById('filterLamp').value;
 
-            // フィルター適用処理
             const filteredSongs = songs.filter(s => {
                 const lamp = userLamps[s.id] || 'NP';
                 const rank = lampRank[lamp];
@@ -442,7 +461,7 @@
             });
 
             renderList(filteredSongs);
-            updateDashboard(filterLv); // リスト更新と同時にダッシュボードも更新
+            updateDashboard(filterLv);
         }
 
         function applyPreset(levelVal, lampVal) {
@@ -499,11 +518,7 @@
             });
         }
 
-        // ==========================================
-        // 【新規】 ダッシュボード（円グラフ）更新処理
-        // ==========================================
         function updateDashboard(filterLv) {
-            // 現在選択されている「レベル」に属する全曲を取得（ランプ絞り込みは無視する）
             const targetSongs = songs.filter(s => {
                 if (filterLv !== 'ALL') {
                     if (filterLv === '12.0_OVER') {
@@ -521,9 +536,8 @@
             const total = targetSongs.length;
             if (total === 0) return;
 
-            // ランプの集計
             const counts = { 'FC':0, 'EXH':0, 'HARD':0, 'N':0, 'E':0, 'AE':0, 'F':0, 'NP':0 };
-            let clearCount = 0; // EASY(ランク3)以上をクリアとする
+            let clearCount = 0; 
 
             targetSongs.forEach(s => {
                 const lamp = userLamps[s.id] || 'NP';
@@ -533,12 +547,10 @@
                 }
             });
 
-            // 円グラフの描画用文字列（conic-gradient）の生成
             let gradientString = [];
             let currentPercent = 0;
             let legendHTML = '';
 
-            // グラフの描画順（FCから順に描画）
             const drawOrder = ['FC', 'EXH', 'HARD', 'N', 'E', 'AE', 'F', 'NP'];
 
             drawOrder.forEach(lamp => {
@@ -550,7 +562,6 @@
                     currentPercent += percent;
                 }
 
-                // 凡例（0件のものもグレーアウト等せず表示しておくとモチベーションに繋がります）
                 legendHTML += `
                     <div class="legend-item" style="opacity: ${count > 0 ? '1' : '0.4'};">
                         <div class="legend-color" style="background: ${lampColors[lamp]}; box-shadow: 0 0 5px ${lampColors[lamp]};"></div>
@@ -559,14 +570,11 @@
                 `;
             });
 
-            // CSSの background を動的に書き換えて円グラフを更新
             document.getElementById('lampChart').style.background = `conic-gradient(${gradientString.join(', ')})`;
             
-            // 中央のクリア率テキストを更新
             const clearRate = Math.round((clearCount / total) * 100);
             document.getElementById('chartClearRate').innerText = `${clearRate}%`;
             
-            // 凡例を更新
             document.getElementById('chartLegend').innerHTML = legendHTML;
         }
 
@@ -590,13 +598,12 @@
             if (currentEditingId) {
                 userLamps[currentEditingId] = status;
                 localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
-                applyFilters(); // リストとダッシュボードが再描画されます
+                applyFilters(); 
             }
             sheet.classList.remove('active');
             overlay.classList.remove('active');
         }
 
-        // CSVエクスポート
         function exportCSV() {
             let csvContent = "ID,曲名,公式レベル,非公式レベル,ランプ\n";
             songs.forEach(s => {
@@ -617,7 +624,6 @@
             window.URL.revokeObjectURL(url);
         }
 
-        // CSVパース関数
         function parseCSVLine(str) {
             const result = [];
             let current = '';
@@ -648,7 +654,6 @@
             return result;
         }
 
-        // 公式CSV連携処理
         function processOfficialCSV(lines) {
             const header = parseCSVLine(lines[0]);
             const titleIdx = header.indexOf('タイトル');
@@ -705,7 +710,6 @@
             alert(`公式プレイデータから ${updateCount} 譜面のランプを同期・更新しました！`);
         }
 
-        // 当アプリのバックアップ復元処理
         function processBackupCSV(lines) {
             const newLamps = {};
             for (let i = 1; i < lines.length; i++) {
@@ -725,7 +729,6 @@
             alert('バックアップデータの復元が完了しました！');
         }
 
-        // インポート（ファイル読込）
         function importCSV(event) {
             const file = event.target.files[0];
             if (!file) return;
