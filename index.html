@@ -51,8 +51,6 @@
             align-items: center;
             margin-bottom: 15px;
         }
-        
-        /* 最終更新日表示用に追加 */
         .header-title-area {
             display: flex;
             flex-direction: column;
@@ -295,20 +293,37 @@
             z-index: 99;
         }
         .overlay.active { display: block; }
+
+        .import-textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            box-sizing: border-box;
+            resize: none;
+        }
+        .import-textarea:focus {
+            outline: none;
+            border-color: #00ffcc;
+        }
     </style>
 </head>
 <body>
 
     <div class="fixed-top-area">
         <div class="header">
-            <!-- タイトルと最終更新日をグループ化 -->
             <div class="header-title-area">
                 <h1>DP CLEARMANAGER</h1>
                 <div class="last-updated" id="lastUpdatedDisplay">難易度表 最終更新: 取得中...</div>
             </div>
             <div class="header-buttons">
-                <button class="btn-export" style="background: rgba(0, 255, 204, 0.1); border-color: rgba(0, 255, 204, 0.3);" onclick="document.getElementById('importFile').click()">読込</button>
-                <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importCSV(event)">
+                <button class="btn-export" style="background: rgba(0, 255, 204, 0.1); border-color: rgba(0, 255, 204, 0.3);" onclick="openImportSheet()">読込</button>
+                <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importCSVFile(event)">
                 <button class="btn-export" onclick="exportCSV()">保存</button>
             </div>
         </div>
@@ -355,6 +370,7 @@
     </div>
 
     <div class="overlay" id="overlay"></div>
+    
     <div class="bottom-sheet" id="bottomSheet">
         <div class="sheet-title">ランプ更新</div>
         <div class="song-title-display" id="popupSongTitle"></div>
@@ -367,6 +383,22 @@
             <button class="lamp-btn lamp-hard" onclick="updateLamp('HARD')">HARD</button>
             <button class="lamp-btn lamp-exh" onclick="updateLamp('EXH')">EXH</button>
             <button class="lamp-btn lamp-fc" onclick="updateLamp('FC')">FC</button>
+        </div>
+    </div>
+
+    <div class="bottom-sheet" id="importSheet">
+        <div class="sheet-title">データの読込（インポート）</div>
+        <p style="font-size:12px; color:#aaa; margin-bottom:10px; line-height:1.4;">
+            e-amusement公式でコピーしたテキスト、または当アプリのバックアップデータを貼り付けてください。
+        </p>
+        <textarea id="importTextarea" class="import-textarea" placeholder="ここにテキストをペースト..."></textarea>
+        
+        <div style="display:flex; gap:10px; margin-bottom: 15px;">
+            <button class="filter-btn" style="flex:1; border-color:#00ffcc; color:#00ffcc;" onclick="importFromText()">貼り付けたテキストで更新</button>
+        </div>
+        <div style="text-align:center; font-size:12px; color:#aaa; margin-bottom:10px;">または</div>
+        <div style="display:flex; justify-content:center;">
+            <button class="btn-export" style="padding:10px 20px;" onclick="document.getElementById('importFile').click()">CSVファイルを選択して読込</button>
         </div>
     </div>
 
@@ -393,7 +425,6 @@
                 const res = await fetch('master_data.json');
                 const data = await res.json();
                 
-                // 新しいJSON構造に対応 (オブジェクトか配列かで分岐)
                 if (Array.isArray(data)) {
                     songs = data;
                     document.getElementById('lastUpdatedDisplay').innerText = '難易度表 最終更新: (旧フォーマット)';
@@ -578,19 +609,28 @@
             document.getElementById('chartLegend').innerHTML = legendHTML;
         }
 
-        const sheet = document.getElementById('bottomSheet');
         const overlay = document.getElementById('overlay');
-        const titleDisplay = document.getElementById('popupSongTitle');
+        
+        overlay.onclick = () => {
+            document.getElementById('bottomSheet').classList.remove('active');
+            document.getElementById('importSheet').classList.remove('active');
+            overlay.classList.remove('active');
+        }
 
         function openSheet(id, title) {
             currentEditingId = id;
-            titleDisplay.textContent = title;
-            sheet.classList.add('active');
+            document.getElementById('popupSongTitle').textContent = title;
+            document.getElementById('bottomSheet').classList.add('active');
             overlay.classList.add('active');
         }
 
-        overlay.onclick = () => {
-            sheet.classList.remove('active');
+        function openImportSheet() {
+            document.getElementById('importSheet').classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeImportSheet() {
+            document.getElementById('importSheet').classList.remove('active');
             overlay.classList.remove('active');
         }
 
@@ -600,7 +640,7 @@
                 localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
                 applyFilters(); 
             }
-            sheet.classList.remove('active');
+            document.getElementById('bottomSheet').classList.remove('active');
             overlay.classList.remove('active');
         }
 
@@ -655,19 +695,30 @@
         }
 
         function processOfficialCSV(lines) {
-            const header = parseCSVLine(lines[0]);
-            const titleIdx = header.indexOf('タイトル');
-            const hyperIdx = header.indexOf('HYPER クリアタイプ');
-            const anotherIdx = header.indexOf('ANOTHER クリアタイプ');
-            const leggendariaIdx = header.indexOf('LEGGENDARIA クリアタイプ');
+            let titleIdx = -1, hyperIdx = -1, anotherIdx = -1, leggendariaIdx = -1;
+            let startIndex = 0;
 
-            if (titleIdx === -1) {
-                alert('公式CSVのフォーマットが正しくありません。（「タイトル」列が見つかりません）');
+            const firstLineCols = parseCSVLine(lines[0]);
+            
+            if (firstLineCols.includes('タイトル')) {
+                titleIdx = firstLineCols.indexOf('タイトル');
+                hyperIdx = firstLineCols.indexOf('HYPER クリアタイプ');
+                anotherIdx = firstLineCols.indexOf('ANOTHER クリアタイプ');
+                leggendariaIdx = firstLineCols.indexOf('LEGGENDARIA クリアタイプ');
+                startIndex = 1; 
+            } else if (firstLineCols.length >= 35) {
+                titleIdx = 1;
+                hyperIdx = 24;
+                anotherIdx = 31;
+                leggendariaIdx = 38;
+                startIndex = 0; 
+            } else {
+                alert('公式データのフォーマットが正しくありません。\n（コピーしたテキストの列数が不足しています）');
                 return;
             }
 
             const csvData = {};
-            for (let i = 1; i < lines.length; i++) {
+            for (let i = startIndex; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (!line) continue;
                 const cols = parseCSVLine(line);
@@ -691,9 +742,9 @@
                 const row = csvData[baseTitle];
                 if (row) {
                     let offLampStr = null;
-                    if (diffType === 'H' && hyperIdx !== -1) offLampStr = row[hyperIdx];
-                    else if (diffType === 'A' && anotherIdx !== -1) offLampStr = row[anotherIdx];
-                    else if (diffType === 'L' && leggendariaIdx !== -1) offLampStr = row[leggendariaIdx];
+                    if (diffType === 'H' && row.length > hyperIdx) offLampStr = row[hyperIdx];
+                    else if (diffType === 'A' && row.length > anotherIdx) offLampStr = row[anotherIdx];
+                    else if (diffType === 'L' && row.length > leggendariaIdx) offLampStr = row[leggendariaIdx];
 
                     if (offLampStr) {
                         const newLamp = officialLampMap[offLampStr];
@@ -729,7 +780,33 @@
             alert('バックアップデータの復元が完了しました！');
         }
 
-        function importCSV(event) {
+        function importFromText() {
+            const text = document.getElementById('importTextarea').value;
+            if (!text.trim()) {
+                alert('テキストが入力されていません。');
+                return;
+            }
+            
+            if (!confirm('データを読み込みます。既存のランプ状態は上書き更新されます。よろしいですか？')) {
+                return;
+            }
+            
+            const cleanText = text.replace(/^\uFEFF/, '');
+            const lines = cleanText.split(/\r\n|\n/);
+            if (lines[0] && lines[0].startsWith('ID')) {
+                processBackupCSV(lines);
+            } else {
+                processOfficialCSV(lines);
+            }
+            
+            document.getElementById('importTextarea').value = '';
+            closeImportSheet();
+        }
+
+        // ==========================================
+        // 【修正】文字コード自動変換の罠を回避する処理
+        // ==========================================
+        function importCSVFile(event) {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -743,25 +820,40 @@
             reader.onload = function(e) {
                 const buffer = e.target.result;
                 
-                let text = new TextDecoder('utf-8').decode(buffer);
-                let lines = text.split(/\r\n|\n/);
+                // ① まずはUTF-8でデコード（スマホで自動変換された公式CSV・バックアップCSV対応）
+                let textUtf8 = new TextDecoder('utf-8').decode(buffer).replace(/^\uFEFF/, '');
+                let linesUtf8 = textUtf8.split(/\r\n|\n/);
                 
-                if (lines[0] && lines[0].startsWith('ID')) {
-                    processBackupCSV(lines);
+                // バックアップCSVか判定
+                if (linesUtf8[0] && linesUtf8[0].startsWith('ID')) {
+                    processBackupCSV(linesUtf8);
                     event.target.value = '';
+                    closeImportSheet();
                     return;
                 }
 
-                text = new TextDecoder('shift-jis').decode(buffer);
-                lines = text.split(/\r\n|\n/);
+                // 公式CSVがUTF-8に変換されているか判定
+                const firstColsUtf8 = parseCSVLine(linesUtf8[0]);
+                if (firstColsUtf8.includes('タイトル') || firstColsUtf8.length >= 35) {
+                    processOfficialCSV(linesUtf8);
+                    event.target.value = '';
+                    closeImportSheet();
+                    return;
+                }
 
-                if (lines[0] && lines[0].includes('タイトル')) {
-                    processOfficialCSV(lines);
+                // ② 上記に当てはまらない場合、本来の公式CSV（Shift-JIS）としてデコード
+                let textSjis = new TextDecoder('shift-jis').decode(buffer).replace(/^\uFEFF/, '');
+                let linesSjis = textSjis.split(/\r\n|\n/);
+
+                const firstColsSjis = parseCSVLine(linesSjis[0]);
+                if (firstColsSjis.includes('タイトル') || firstColsSjis.length >= 35) {
+                    processOfficialCSV(linesSjis);
                 } else {
                     alert('対応していないファイル形式です。\n当アプリのバックアップファイル、またはe-amusement公式のプレイデータCSVを選択してください。');
                 }
                 
                 event.target.value = '';
+                closeImportSheet();
             };
             
             reader.readAsArrayBuffer(file);
