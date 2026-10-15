@@ -348,7 +348,8 @@
         const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
 
         function applyFilters() {
-            const searchWord = document.getElementById('searchInput').value.toLowerCase();
+            // 前後の空白を削除して小文字化
+            const searchWord = document.getElementById('searchInput').value.trim().toLowerCase();
             const filterLv = document.getElementById('filterLevel').value;
             const filterLamp = document.getElementById('filterLamp').value;
 
@@ -356,7 +357,8 @@
                 const lamp = userLamps[s.id] || 'NP';
                 const rank = lampRank[lamp];
 
-                if (searchWord && !s.title.toLowerCase().includes(searchWord)) return false;
+                // 前方一致 (startsWith) に変更。「The」の特殊処理は行わない
+                if (searchWord && !s.title.toLowerCase().startsWith(searchWord)) return false;
 
                 if (filterLv !== 'ALL') {
                     if (filterLv === '12.0_OVER') {
