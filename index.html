@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IIDX DP CLEARMANAGER</title>
     
-    <!-- ▼▼▼ ここにアイコン設定を追加 ▼▼▼ -->
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" href="icon.png">
+    <!-- アプリアイコンの設定 -->
+    <link rel="apple-touch-icon" href="icon.jpg">
+    <link rel="icon" href="icon.jpg">
     
     <style>
         :root {
@@ -16,7 +16,7 @@
             --color-ae: #cc33ff;
             --color-e: #33ff33;
             --color-n: #33ccff;
-            --color-hard: #ff5500;
+            --color-hard: #f2f2f2; /* ←ハードクリアを白色に変更 */
             --color-exh: #ffcc00;
             --color-fc: #00ffcc;
             --bg-color: #0d0f12;
@@ -286,7 +286,8 @@
         .lamp-ae { border-color: var(--color-ae); color: var(--color-ae); box-shadow: 0 0 10px rgba(204,51,255,0.5); }
         .lamp-e { border-color: var(--color-e); color: var(--color-e); box-shadow: 0 0 10px rgba(51,255,51,0.5); }
         .lamp-n { border-color: var(--color-n); color: var(--color-n); box-shadow: 0 0 10px rgba(51,204,255,0.5); }
-        .lamp-hard { border-color: var(--color-hard); color: var(--color-hard); box-shadow: 0 0 10px rgba(255,85,0,0.5); }
+        /* ▼ ハードクリアボタンの影も白系統に調整 ▼ */
+        .lamp-hard { border-color: var(--color-hard); color: var(--color-hard); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
         .lamp-exh { border-color: var(--color-exh); color: var(--color-exh); box-shadow: 0 0 15px rgba(255,204,0,0.6); }
         .lamp-fc { border-color: var(--color-fc); color: var(--color-fc); box-shadow: 0 0 15px rgba(0,255,204,0.6); }
 
@@ -414,9 +415,10 @@
 
         const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
         
+        // ▼ JavaScript側の円グラフやリスト表示用の色も白に変更 ▼
         const lampColors = {
             'NP': '#666666', 'F': '#ff3333', 'AE': '#cc33ff', 'E': '#33ff33',
-            'N': '#33ccff', 'HARD': '#ff5500', 'EXH': '#ffcc00', 'FC': '#00ffcc'
+            'N': '#33ccff', 'HARD': '#f2f2f2', 'EXH': '#ffcc00', 'FC': '#00ffcc'
         };
 
         const officialLampMap = {
@@ -536,7 +538,9 @@
                 const lamp = userLamps[song.id] || 'NP';
                 const div = document.createElement('div');
                 div.className = 'song-card';
-                let lampColor = `var(--color-${lamp.toLowerCase()})`;
+                
+                // NPの場合は暗くする処理
+                let lampColor = lampColors[lamp];
                 if(lamp === 'NP') lampColor = '#333';
 
                 const displayLv = Number.isInteger(song.level) ? song.level.toFixed(1) : song.level;
@@ -808,9 +812,6 @@
             closeImportSheet();
         }
 
-        // ==========================================
-        // 【修正】文字コード自動変換の罠を回避する処理
-        // ==========================================
         function importCSVFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -825,11 +826,9 @@
             reader.onload = function(e) {
                 const buffer = e.target.result;
                 
-                // ① まずはUTF-8でデコード（スマホで自動変換された公式CSV・バックアップCSV対応）
                 let textUtf8 = new TextDecoder('utf-8').decode(buffer).replace(/^\uFEFF/, '');
                 let linesUtf8 = textUtf8.split(/\r\n|\n/);
                 
-                // バックアップCSVか判定
                 if (linesUtf8[0] && linesUtf8[0].startsWith('ID')) {
                     processBackupCSV(linesUtf8);
                     event.target.value = '';
@@ -837,7 +836,6 @@
                     return;
                 }
 
-                // 公式CSVがUTF-8に変換されているか判定
                 const firstColsUtf8 = parseCSVLine(linesUtf8[0]);
                 if (firstColsUtf8.includes('タイトル') || firstColsUtf8.length >= 35) {
                     processOfficialCSV(linesUtf8);
@@ -846,7 +844,6 @@
                     return;
                 }
 
-                // ② 上記に当てはまらない場合、本来の公式CSV（Shift-JIS）としてデコード
                 let textSjis = new TextDecoder('shift-jis').decode(buffer).replace(/^\uFEFF/, '');
                 let linesSjis = textSjis.split(/\r\n|\n/);
 
