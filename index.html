@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DP CLEARMANAGER</title>
+    <!-- タイトルを DP ClearManager に統一 -->
+    <title>DP ClearManager</title>
     
-    <!-- アプリアイコンの設定（jpgに変更） -->
     <link rel="apple-touch-icon" href="icon.jpg?v=1">
     <link rel="icon" href="icon.jpg?v=1">
     
@@ -16,7 +16,7 @@
             --color-ae: #cc33ff;
             --color-e: #33ff33;
             --color-n: #33ccff;
-            --color-hard: #f2f2f2; /* ハードクリアを白色に変更 */
+            --color-hard: #f2f2f2; 
             --color-exh: #ffcc00;
             --color-fc: #00ffcc;
             --bg-color: #0d0f12;
@@ -286,7 +286,7 @@
         .lamp-ae { border-color: var(--color-ae); color: var(--color-ae); box-shadow: 0 0 10px rgba(204,51,255,0.5); }
         .lamp-e { border-color: var(--color-e); color: var(--color-e); box-shadow: 0 0 10px rgba(51,255,51,0.5); }
         .lamp-n { border-color: var(--color-n); color: var(--color-n); box-shadow: 0 0 10px rgba(51,204,255,0.5); }
-        .lamp-hard { border-color: var(--color-hard); color: var(--color-hard); box-shadow: 0 0 10px rgba(255,255,255,0.5); } /* 影も白系統に調整 */
+        .lamp-hard { border-color: var(--color-hard); color: var(--color-hard); box-shadow: 0 0 10px rgba(255,255,255,0.5); } 
         .lamp-exh { border-color: var(--color-exh); color: var(--color-exh); box-shadow: 0 0 15px rgba(255,204,0,0.6); }
         .lamp-fc { border-color: var(--color-fc); color: var(--color-fc); box-shadow: 0 0 15px rgba(0,255,204,0.6); }
 
@@ -323,7 +323,7 @@
     <div class="fixed-top-area">
         <div class="header">
             <div class="header-title-area">
-                <h1>DP CLEARMANAGER</h1>
+                <h1>DP ClearManager</h1>
                 <div class="last-updated" id="lastUpdatedDisplay">難易度表 最終更新: 取得中...</div>
             </div>
             <div class="header-buttons">
@@ -347,30 +347,33 @@
         <input type="text" class="search-box" placeholder="曲名で検索..." id="searchInput" oninput="applyFilters()">
 
         <div class="preset-filters">
-            <button class="filter-btn" onclick="applyPreset('ALL', 'NOT_CLEAR')">未クリア</button>
-            <button class="filter-btn" style="border-color:#ffcc00; color:#ffcc00;" onclick="applyPreset('11.0_11.8', 'NOT_CLEAR')">12.0未満 未クリア</button>
-            <button class="filter-btn" style="border-color:#cc33ff; color:#cc33ff;" onclick="applyPreset('12.0_OVER', 'NOT_CLEAR')">12.0以上 挑戦</button>
+            <!-- プリセットボタンも新しい定義に準拠 -->
+            <button class="filter-btn" style="border-color:#aaa; color:#aaa;" onclick="applyPreset('ALL', 'NP')">未プレイ</button>
+            <button class="filter-btn" style="border-color:#ff3333; color:#ff3333;" onclick="applyPreset('ALL', 'UN_CLEAR')">未クリア (F/AE)</button>
+            <button class="filter-btn" style="border-color:#33ff33; color:#33ff33;" onclick="applyPreset('ALL', 'UN_HARD')">未難 (E/N)</button>
+            <button class="filter-btn" style="border-color:#cc33ff; color:#cc33ff;" onclick="applyPreset('12.0_OVER', 'UN_CLEAR')">12.0以上 挑戦</button>
         </div>
 
         <div class="filter-group">
-            <select id="filterLevel" class="filter-select" onchange="applyFilters()">
+            <select id="filterLevel" class="filter-select" onchange="applyFilters(true)">
                 <option value="ALL">非公式 全て</option>
             </select>
-            <select id="filterLamp" class="filter-select" onchange="applyFilters()">
-                <option value="ALL">ランプ 全て</option>
-                <option value="NOT_CLEAR">未クリア (NP/F/AE)</option>
-                <option value="NOT_HARD">未難 (NP/F/AE/E/N)</option>
-                <option value="NOT_EXH">未EXH (HARD以下)</option>
-                <option value="CLEAR">クリア済 (E/N)</option>
-                <option value="HARD">HARD以上</option>
-                <option value="EXH">EXH以上</option>
+            <!-- メモ画像に基づく完璧なフィルターリスト -->
+            <select id="filterLamp" class="filter-select" onchange="applyFilters(true)">
+                <option value="ALL">ランプ全て</option>
+                <option value="NP">未プレイ (NP)</option>
+                <option value="UN_CLEAR">未クリア (F/AE)</option>
+                <option value="UN_HARD">未難 (E/N)</option>
+                <option value="UN_EXH">未EXH (HARD)</option>
+                <option value="UN_FC">未FC (EXH)</option>
+                <option value="FC">FC (FC)</option>
             </select>
         </div>
 
         <div class="list-summary" id="listSummary">読み込み中...</div>
     </div>
 
-    <div class="scrollable-list-area">
+    <div class="scrollable-list-area" id="scrollArea">
         <div class="song-list" id="songList"></div>
     </div>
 
@@ -414,7 +417,6 @@
 
         const lampRank = { 'NP': 0, 'F': 1, 'AE': 2, 'E': 3, 'N': 4, 'HARD': 5, 'EXH': 6, 'FC': 7 };
         
-        // JavaScript側の円グラフやリスト表示用の色も白に変更
         const lampColors = {
             'NP': '#666666', 'F': '#ff3333', 'AE': '#cc33ff', 'E': '#33ff33',
             'N': '#33ccff', 'HARD': '#f2f2f2', 'EXH': '#ffcc00', 'FC': '#00ffcc'
@@ -463,7 +465,7 @@
             });
         }
 
-        function applyFilters() {
+        function applyFilters(scrollToTop = false) {
             const searchWord = document.getElementById('searchInput').value.trim().toLowerCase();
             const filterLv = document.getElementById('filterLevel').value;
             const filterLamp = document.getElementById('filterLamp').value;
@@ -486,12 +488,13 @@
                 }
 
                 if (filterLamp !== 'ALL') {
-                    if (filterLamp === 'NOT_CLEAR' && rank >= 3) return false;
-                    if (filterLamp === 'NOT_HARD' && rank >= 5) return false;
-                    if (filterLamp === 'NOT_EXH' && rank >= 6) return false;
-                    if (filterLamp === 'CLEAR' && (rank < 3 || rank >= 5)) return false;
-                    if (filterLamp === 'HARD' && rank < 5) return false;
-                    if (filterLamp === 'EXH' && rank < 6) return false;
+                    // メモ画像に完全に一致するフィルタリングロジック
+                    if (filterLamp === 'NP' && rank !== 0) return false; // ② 未プレイ (NPのみ)
+                    if (filterLamp === 'UN_CLEAR' && (rank !== 1 && rank !== 2)) return false; // ③ 未クリア (F/AEのみ)
+                    if (filterLamp === 'UN_HARD' && (rank !== 3 && rank !== 4)) return false; // ④ 未難 (E/Nのみ)
+                    if (filterLamp === 'UN_EXH' && rank !== 5) return false; // ⑤ 未EXH (HARDのみ)
+                    if (filterLamp === 'UN_FC' && rank !== 6) return false; // ⑥ 未FC (EXHのみ)
+                    if (filterLamp === 'FC' && rank !== 7) return false; // ⑦ FC (FCのみ)
                 }
 
                 return true;
@@ -499,6 +502,10 @@
 
             renderList(filteredSongs);
             updateDashboard(filterLv);
+
+            if (scrollToTop) {
+                document.getElementById('scrollArea').scrollTop = 0;
+            }
         }
 
         function applyPreset(levelVal, lampVal) {
@@ -524,7 +531,8 @@
             }
             levelSelect.value = levelVal;
             lampSelect.value = lampVal;
-            applyFilters();
+            
+            applyFilters(true);
         }
 
         function renderList(targetSongs) {
@@ -645,7 +653,7 @@
             if (currentEditingId) {
                 userLamps[currentEditingId] = status;
                 localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
-                applyFilters(); 
+                applyFilters(false); 
             }
             document.getElementById('bottomSheet').classList.remove('active');
             overlay.classList.remove('active');
@@ -701,6 +709,45 @@
             return result;
         }
 
+        // ==========================================
+        // 【完全網羅版V5】全ての表記揺れを吸収する究極の比較処理
+        // ==========================================
+        function normalizeTitle(title) {
+            if (!title) return "";
+            let t = title.toString();
+            
+            // 1. HTML特殊文字のデコード
+            t = t.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            
+            // 2. 究極の正規化：NFKC（全角英数字・記号を半角に自動変換）
+            t = t.normalize('NFKC');
+            
+            // 3. 全角・半角波ダッシュ系の統一
+            t = t.replace(/[〜～]/g, '~');
+            
+            // 4. 公式CSV側で省略・変換されがちな特殊記号を削除・置換
+            t = t.replace(/[♡☆♥♨]/g, ''); 
+            t = t.replace(/¡/g, '!'); 
+            
+            // 5. ウムラウトやアクセント記号つき文字を通常アルファベットに置換
+            t = t.replace(/ä/g, 'a')
+                 .replace(/ö/g, 'o')
+                 .replace(/ü/g, 'u')
+                 .replace(/Ä/g, 'A')
+                 .replace(/Ö/g, 'O')
+                 .replace(/Ü/g, 'U')
+                 .replace(/é/g, 'e')
+                 .replace(/É/g, 'E');
+
+            // 6. 非公式側が独自につけているバージョン注記などを削除
+            t = t.replace(/\((PC|CB|DJT|SINO|ROOT|EMP|CH|SIR|RDT)\)/gi, '');
+
+            // 7. すべてのスペース（全角・半角）を削除し、小文字化
+            t = t.replace(/[\s]/g, '').toLowerCase();
+            
+            return t;
+        }
+
         function processOfficialCSV(lines) {
             let titleIdx = -1, hyperIdx = -1, anotherIdx = -1, leggendariaIdx = -1;
             let startIndex = 0;
@@ -730,7 +777,9 @@
                 if (!line) continue;
                 const cols = parseCSVLine(line);
                 if (cols.length > titleIdx) {
-                    csvData[cols[titleIdx]] = cols;
+                    const rawTitle = cols[titleIdx];
+                    const normTitle = normalizeTitle(rawTitle);
+                    csvData[normTitle] = cols;
                 }
             }
 
@@ -746,7 +795,9 @@
                     diffType = song.title.substring(suffixIdx + 2, song.title.length - 1);
                 }
 
-                const row = csvData[baseTitle];
+                const normBaseTitle = normalizeTitle(baseTitle);
+                const row = csvData[normBaseTitle];
+
                 if (row) {
                     let offLampStr = null;
                     if (diffType === 'H' && row.length > hyperIdx) offLampStr = row[hyperIdx];
@@ -764,7 +815,7 @@
             });
 
             localStorage.setItem('iidx_dp_lamps', JSON.stringify(userLamps));
-            applyFilters();
+            applyFilters(false);
             alert(`公式プレイデータから ${updateCount} 譜面のランプを同期・更新しました！`);
         }
 

@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026/10/15",
+  "last_updated": "2026/10/24",
   "songs": [
     {
       "id": "スパークリング☆彡ハイパーチューン！！ [H]_8.5",
@@ -2090,12 +2090,6 @@
       "title": "gigadelic (WILD STYLE) [H]"
     },
     {
-      "id": "History of dj TAKA - single style collection - [H]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "History of dj TAKA - single style collection - [H]"
-    },
-    {
       "id": "TEKNO KEISER [H]_10.0",
       "level": 10.0,
       "official_level": 10,
@@ -2106,6 +2100,12 @@
       "level": 10.0,
       "official_level": 10,
       "title": "ΛИ0MΛLY [H]"
+    },
+    {
+      "id": "恋する☆宇宙戦争っ!! (恋する★ハードコアRemix) [H]_10.0",
+      "level": 10.0,
+      "official_level": 10,
+      "title": "恋する☆宇宙戦争っ!! (恋する★ハードコアRemix) [H]"
     },
     {
       "id": "斎戒 [H]_10.0",
@@ -2126,58 +2126,16 @@
       "title": "Fly Above -20th Anniversary Mix- [A]"
     },
     {
-      "id": "Mellow Diary [A]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "Mellow Diary [A]"
-    },
-    {
       "id": "NOMAD (feat. らっぷびと) [A]_10.0",
       "level": 10.0,
       "official_level": 10,
       "title": "NOMAD (feat. らっぷびと) [A]"
     },
     {
-      "id": "Rise Beyond [A]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "Rise Beyond [A]"
-    },
-    {
-      "id": "Samurai Sword [A]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "Samurai Sword [A]"
-    },
-    {
-      "id": "ギミギミエンターテイメント [A]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "ギミギミエンターテイメント [A]"
-    },
-    {
       "id": "でぃすこみゅーたんと！ [A]_10.0",
       "level": 10.0,
       "official_level": 10,
       "title": "でぃすこみゅーたんと！ [A]"
-    },
-    {
-      "id": "フランケンシュタインの怪物 [A]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "フランケンシュタインの怪物 [A]"
-    },
-    {
-      "id": "ラブパラ [A]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "ラブパラ [A]"
-    },
-    {
-      "id": "倍倍FIGHT! [A]_10.0",
-      "level": 10.0,
-      "official_level": 10,
-      "title": "倍倍FIGHT! [A]"
     },
     {
       "id": "映夢雪花抄 [A]_10.0",
@@ -3884,6 +3842,42 @@
       "title": "百恋ラブラスター [A]"
     },
     {
+      "id": "Mellow Diary [A]_10.2",
+      "level": 10.2,
+      "official_level": 10,
+      "title": "Mellow Diary [A]"
+    },
+    {
+      "id": "Rise Beyond [A]_10.2",
+      "level": 10.2,
+      "official_level": 10,
+      "title": "Rise Beyond [A]"
+    },
+    {
+      "id": "Samurai Sword [A]_10.2",
+      "level": 10.2,
+      "official_level": 10,
+      "title": "Samurai Sword [A]"
+    },
+    {
+      "id": "ギミギミエンターテイメント [A]_10.2",
+      "level": 10.2,
+      "official_level": 10,
+      "title": "ギミギミエンターテイメント [A]"
+    },
+    {
+      "id": "フランケンシュタインの怪物 [A]_10.2",
+      "level": 10.2,
+      "official_level": 10,
+      "title": "フランケンシュタインの怪物 [A]"
+    },
+    {
+      "id": "倍倍FIGHT! [A]_10.2",
+      "level": 10.2,
+      "official_level": 10,
+      "title": "倍倍FIGHT! [A]"
+    },
+    {
       "id": "THE EARTH LIGHT [H]_10.5",
       "level": 10.5,
       "official_level": 10,
@@ -5076,6 +5070,18 @@
       "level": 10.5,
       "official_level": 10,
       "title": "Watermelon Explosion [A]"
+    },
+    {
+      "id": "History of dj TAKA - single style collection - [H]_10.5",
+      "level": 10.5,
+      "official_level": 10,
+      "title": "History of dj TAKA - single style collection - [H]"
+    },
+    {
+      "id": "ラブパラ [A]_10.5",
+      "level": 10.5,
+      "official_level": 10,
+      "title": "ラブパラ [A]"
     },
     {
       "id": "Holic [H]_10.7",
@@ -6458,12 +6464,6 @@
       "title": "Egret and Willow [A]"
     },
     {
-      "id": "次葉 -turn the page- [L]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "次葉 -turn the page- [L]"
-    },
-    {
       "id": "Battleground [A]_11.0",
       "level": 11.0,
       "official_level": 11,
@@ -6668,52 +6668,22 @@
       "title": "Meteor☆Shower [A]"
     },
     {
-      "id": "9-1 [A]_11.0",
+      "id": "GOLD RUSH (all-or-nothing MIX) [A]_11.0",
       "level": 11.0,
       "official_level": 11,
-      "title": "9-1 [A]"
+      "title": "GOLD RUSH (all-or-nothing MIX) [A]"
     },
     {
-      "id": "BENiZAKURA [A]_11.0",
+      "id": "I'm so Happy (20th Anniv.Mix) [A]_11.0",
       "level": 11.0,
       "official_level": 11,
-      "title": "BENiZAKURA [A]"
-    },
-    {
-      "id": "Dying 4 U [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "Dying 4 U [A]"
-    },
-    {
-      "id": "GENERATED GRID [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "GENERATED GRID [A]"
-    },
-    {
-      "id": "Memorylust [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "Memorylust [A]"
-    },
-    {
-      "id": "moffing 猫叉Master meets β2 黒パカミックス [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "moffing 猫叉Master meets β2 黒パカミックス [A]"
+      "title": "I'm so Happy (20th Anniv.Mix) [A]"
     },
     {
       "id": "PISTOL SWORD [A]_11.0",
       "level": 11.0,
       "official_level": 11,
       "title": "PISTOL SWORD [A]"
-    },
-    {
-      "id": "Shogun's Last Dawn ft. Kanae Asaba [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "Shogun's Last Dawn ft. Kanae Asaba [A]"
     },
     {
       "id": "Singularity Girl [A]_11.0",
@@ -6734,28 +6704,10 @@
       "title": "デラむぅのでらっくす☆かるた ～NOTES・CHORD・PEAK編～ [A]"
     },
     {
-      "id": "九十九ノ恋結ビ [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "九十九ノ恋結ビ [A]"
-    },
-    {
-      "id": "夜叉ノ魂 [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "夜叉ノ魂 [A]"
-    },
-    {
       "id": "悪ジ狂キ [A]_11.0",
       "level": 11.0,
       "official_level": 11,
       "title": "悪ジ狂キ [A]"
-    },
-    {
-      "id": "雷霆の如し [A]_11.0",
-      "level": 11.0,
-      "official_level": 11,
-      "title": "雷霆の如し [A]"
     },
     {
       "id": "ABSOLUTE [A]_11.2",
@@ -7724,6 +7676,24 @@
       "title": "月下繚乱 [A]"
     },
     {
+      "id": "Dying 4 U [A]_11.2",
+      "level": 11.2,
+      "official_level": 11,
+      "title": "Dying 4 U [A]"
+    },
+    {
+      "id": "GENERATED GRID [A]_11.2",
+      "level": 11.2,
+      "official_level": 11,
+      "title": "GENERATED GRID [A]"
+    },
+    {
+      "id": "九十九ノ恋結ビ [A]_11.2",
+      "level": 11.2,
+      "official_level": 11,
+      "title": "九十九ノ恋結ビ [A]"
+    },
+    {
       "id": "Clione [L]_11.4",
       "level": 11.4,
       "official_level": 11,
@@ -8306,6 +8276,12 @@
       "title": "Selfish Sweet [L]"
     },
     {
+      "id": "次葉 -turn the page- [L]_11.4",
+      "level": 11.4,
+      "official_level": 11,
+      "title": "次葉 -turn the page- [L]"
+    },
+    {
       "id": "Around the Future [A]_11.4",
       "level": 11.4,
       "official_level": 11,
@@ -8796,6 +8772,18 @@
       "level": 11.4,
       "official_level": 11,
       "title": "閃と雷管とロープ [A]"
+    },
+    {
+      "id": "Shogun's Last Dawn ft. Kanae Asaba [A]_11.4",
+      "level": 11.4,
+      "official_level": 11,
+      "title": "Shogun's Last Dawn ft. Kanae Asaba [A]"
+    },
+    {
+      "id": "雷霆の如し [A]_11.4",
+      "level": 11.4,
+      "official_level": 11,
+      "title": "雷霆の如し [A]"
     },
     {
       "id": "Schlagwerk [H]_11.6",
@@ -9746,6 +9734,30 @@
       "title": "ベラ・ベ・カラベラ [A]"
     },
     {
+      "id": "9-1 [A]_11.6",
+      "level": 11.6,
+      "official_level": 11,
+      "title": "9-1 [A]"
+    },
+    {
+      "id": "Memorylust [A]_11.6",
+      "level": 11.6,
+      "official_level": 11,
+      "title": "Memorylust [A]"
+    },
+    {
+      "id": "moffing 猫叉Master meets β2 黒パカミックス [A]_11.6",
+      "level": 11.6,
+      "official_level": 11,
+      "title": "moffing 猫叉Master meets β2 黒パカミックス [A]"
+    },
+    {
+      "id": "夜叉ノ魂 [A]_11.6",
+      "level": 11.6,
+      "official_level": 11,
+      "title": "夜叉ノ魂 [A]"
+    },
+    {
       "id": "Macho Gang [H]_11.8",
       "level": 11.8,
       "official_level": 11,
@@ -10340,6 +10352,12 @@
       "title": "ADAMANT [A]"
     },
     {
+      "id": "BENiZAKURA [A]_12.0",
+      "level": 12.0,
+      "official_level": 11,
+      "title": "BENiZAKURA [A]"
+    },
+    {
       "id": "AGEHA [L]_12.1",
       "level": 12.1,
       "official_level": 11,
@@ -10766,12 +10784,6 @@
       "title": "童話回廊 [A]"
     },
     {
-      "id": "TOGAKUSHI [L]_12.0",
-      "level": 12.0,
-      "official_level": 12,
-      "title": "TOGAKUSHI [L]"
-    },
-    {
       "id": "Antigravity [A]_12.0",
       "level": 12.0,
       "official_level": 12,
@@ -10812,12 +10824,6 @@
       "level": 12.0,
       "official_level": 12,
       "title": "深淵に捧ぐレクイエム [A]"
-    },
-    {
-      "id": "Calvados Queen [L]_12.0",
-      "level": 12.0,
-      "official_level": 12,
-      "title": "Calvados Queen [L]"
     },
     {
       "id": "Rubrum Piano [A]_12.0",
@@ -10898,16 +10904,64 @@
       "title": "かわいいだけじゃだめですか？ [L]"
     },
     {
+      "id": "Citroforte [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "Citroforte [A]"
+    },
+    {
+      "id": "DEADRABBIT!! [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "DEADRABBIT!! [A]"
+    },
+    {
+      "id": "Deathstalker [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "Deathstalker [A]"
+    },
+    {
       "id": "gigadelic (WILD STYLE) [A]_12.0",
       "level": 12.0,
       "official_level": 12,
       "title": "gigadelic (WILD STYLE) [A]"
     },
     {
-      "id": "History of dj TAKA - single style collection - [A]_12.0",
+      "id": "OTOROSHI [A]_12.0",
       "level": 12.0,
       "official_level": 12,
-      "title": "History of dj TAKA - single style collection - [A]"
+      "title": "OTOROSHI [A]"
+    },
+    {
+      "id": "TEKNO KEISER [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "TEKNO KEISER [A]"
+    },
+    {
+      "id": "ΛИ0MΛLY [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "ΛИ0MΛLY [A]"
+    },
+    {
+      "id": "恋する☆宇宙戦争っ!! (恋する★ハードコアRemix) [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "恋する☆宇宙戦争っ!! (恋する★ハードコアRemix) [A]"
+    },
+    {
+      "id": "斎戒 [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "斎戒 [A]"
+    },
+    {
+      "id": "月下散刄 [A]_12.0",
+      "level": 12.0,
+      "official_level": 12,
+      "title": "月下散刄 [A]"
     },
     {
       "id": "era (nostalmix) [A]_12.1",
@@ -11364,6 +11418,12 @@
       "level": 12.1,
       "official_level": 12,
       "title": "Mighty Beat Monsterz [A]"
+    },
+    {
+      "id": "History of dj TAKA - single style collection - [A]_12.1",
+      "level": 12.1,
+      "official_level": 12,
+      "title": "History of dj TAKA - single style collection - [A]"
     },
     {
       "id": "RUGGED ASH [L]_12.2",
@@ -12456,6 +12516,12 @@
       "level": 12.3,
       "official_level": 12,
       "title": "華麗なる大犬円舞曲 [A]"
+    },
+    {
+      "id": "Calvados Queen [L]_12.3",
+      "level": 12.3,
+      "official_level": 12,
+      "title": "Calvados Queen [L]"
     },
     {
       "id": "ASIAN VIRTUAL REALITIES (MELTING TOGETHER IN DAZZLING DARKNESS) [A]_12.3",
@@ -14118,6 +14184,12 @@
       "level": 12.5,
       "official_level": 12,
       "title": "SAMURAI-Scramble [L]"
+    },
+    {
+      "id": "TOGAKUSHI [L]_12.5",
+      "level": 12.5,
+      "official_level": 12,
+      "title": "TOGAKUSHI [L]"
     },
     {
       "id": "REVOLVER [L]_12.5",
